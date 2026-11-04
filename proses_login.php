@@ -45,7 +45,7 @@ if (!$user) {
          WHERE nip = ?
             OR email = ?
             OR LOWER(REPLACE(nama, ' ', '')) =
-               LOWER(REPLACE(?, ' ', ''))
+             LOWER(REPLACE(?, ' ', ''))
          LIMIT 1"
     );
     mysqli_stmt_bind_param($stmt, "sss", $username, $username, $username);
@@ -119,7 +119,7 @@ if ($role === 'guru') {
     session_regenerate_id(true);
     $_SESSION['user_id']   = $user['id'];
     $_SESSION['guru_id']   = $guru['id'];
-    $_SESSION['name']      = $guru['nama']; // ← NAMA DARI T_GURU
+    $_SESSION['name']      = $guru['nama'];
     $_SESSION['email']     = $guru['email'];
     $_SESSION['role']      = 'guru';
     $_SESSION['login']     = true;
@@ -130,13 +130,34 @@ if ($role === 'guru') {
 
 // ===================== WALI KELAS =====================
 if ($role === 'wali_kelas') {
+    // Cek status aktif di t_guru
+    $stmt = mysqli_prepare(
+        $conn,
+        "SELECT id, nama, email, status_aktif
+         FROM t_guru
+         WHERE user_id = ?
+         LIMIT 1"
+    );
+    mysqli_stmt_bind_param($stmt, "i", $user['id']);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $guru = mysqli_fetch_assoc($result);
+    mysqli_stmt_close($stmt);
+
+    if (!$guru || (int)$guru['status_aktif'] !== 1) {
+        header("Location: index.php?pesan=nonaktif");
+        exit;
+    }
+
     session_regenerate_id(true);
     $_SESSION['user_id'] = $user['id'];
-    $_SESSION['name']    = $user['name']; // ← NAMA DARI T_USERS
-    $_SESSION['email']   = $user['email'];
+    $_SESSION['guru_id'] = $guru['id'];
+    $_SESSION['name']    = $guru['nama'];
+    $_SESSION['email']   = $guru['email'];
     $_SESSION['role']    = 'wali_kelas';
     $_SESSION['login']   = true;
-    header("Location: dashboard.php"); // ← Masuk Dashboard
+    
+    header("Location: dashboard.php");
     exit;
 }
 

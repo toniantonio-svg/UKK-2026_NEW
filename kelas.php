@@ -39,6 +39,36 @@ if (!$result) die("Ambil data kelas gagal: " . mysqli_error($conn));
         <main class="col-md-9 col-lg-10 p-4">
             <h2 class="mb-4">Kelola Data Kelas</h2>
 
+            <!-- NOTIFIKASI -->
+            <?php if (isset($_GET['berhasil'])): ?>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                Kelas berhasil ditambahkan!
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
+            </div>
+            <?php endif; ?>
+
+            <?php if (isset($_GET['dihapus'])): ?>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                Kelas berhasil dihapus!
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
+            </div>
+            <?php endif; ?>
+
+            <?php if (isset($_GET['gagal']) && $_GET['gagal'] === 'siswa'): ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                Tidak bisa dihapus! Masih ada siswa di kelas ini.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
+            </div>
+            <?php endif; ?>
+
+            <?php if (isset($_GET['gagal']) && $_GET['gagal'] === '1'): ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                Gagal menghapus kelas!
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
+            </div>
+            <?php endif; ?>
+
+
             <div class="row mb-4">
                 <div class="col-md-5 col-lg-4">
                     <div class="card shadow-sm border-0">

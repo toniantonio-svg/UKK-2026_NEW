@@ -9,9 +9,12 @@ function e($value) {
     return htmlspecialchars((string)($value ?? '-'), ENT_QUOTES, 'UTF-8');
 }
 
-$query_guru = mysqli_query($conn, "SELECT COUNT(*) AS total FROM t_guru");
-if (!$query_guru) die("Query guru gagal: " . mysqli_error($conn));
-$total_guru = (int)(mysqli_fetch_assoc($query_guru)['total'] ?? 0);
+// === HITUNG TOTAL, AKTIF & TIDAK AKTIF ===
+$total_guru = (int)mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS total FROM t_guru"))['total'];
+
+$aktif_guru = (int)mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS total FROM t_guru WHERE status_aktif = 1"))['total'];
+
+$nonaktif_guru = (int)mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS total FROM t_guru WHERE status_aktif = 0 OR status_aktif IS NULL"))['total'];
 
 $result = mysqli_query($conn, "SELECT * FROM t_guru ORDER BY id ASC");
 if (!$result) die("Pengambilan data guru gagal: " . mysqli_error($conn));
@@ -41,12 +44,29 @@ mysqli_data_seek($result, 0);
         <main class="col-md-9 col-lg-10 p-4">
             <h2 class="mb-4">Kelola Data Guru</h2>
 
-            <div class="row mb-4">
-                <div class="col-md-5 col-lg-4">
-                    <div class="card shadow-sm">
+            <!-- KARTU STATISTIK -->
+            <div class="row mb-4 g-3">
+                <div class="col-md-4 col-lg-4">
+                    <div class="card shadow-sm border-0">
                         <div class="card-body">
                             <h5 class="text-muted fs-6">JUMLAH DATA GURU</h5>
                             <h2 class="text-primary fw-bold"><?= $total_guru ?></h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 col-lg-4">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body">
+                            <h5 class="text-muted fs-6">GURU AKTIF</h5>
+                            <h2 class="text-success fw-bold"><?= $aktif_guru ?></h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 col-lg-4">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body">
+                            <h5 class="text-muted fs-6">GURU TIDAK AKTIF</h5>
+                            <h2 class="text-secondary fw-bold"><?= $nonaktif_guru ?></h2>
                         </div>
                     </div>
                 </div>

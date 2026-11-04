@@ -28,7 +28,6 @@ if (isset($_GET['aktifkan']) && is_numeric($_GET['aktifkan'])) {
         $data = $stmt->get_result()->fetch_assoc();
         if (!$data) throw new Exception("Data tidak ditemukan!");
 
-        // Cek bentrok Guru
         $stmt = $conn->prepare("SELECT id FROM t_wali_kelas 
                                 WHERE guru_id = ? AND tahun_ajaran_id = ? AND status_aktif = 1 AND id <> ?");
         $stmt->bind_param("iii", $data['guru_id'], $data['tahun_ajaran_id'], $id);
@@ -36,7 +35,6 @@ if (isset($_GET['aktifkan']) && is_numeric($_GET['aktifkan'])) {
         if ($stmt->get_result()->num_rows)
             throw new Exception("Guru ini sudah jadi wali kelas aktif di tahun yang sama!");
 
-        // Cek bentrok Kelas
         $stmt = $conn->prepare("SELECT id FROM t_wali_kelas 
                                 WHERE kelas_id = ? AND tahun_ajaran_id = ? AND status_aktif = 1 AND id <> ?");
         $stmt->bind_param("iii", $data['kelas_id'], $data['tahun_ajaran_id'], $id);
@@ -44,7 +42,6 @@ if (isset($_GET['aktifkan']) && is_numeric($_GET['aktifkan'])) {
         if ($stmt->get_result()->num_rows)
             throw new Exception("Kelas ini sudah punya wali kelas aktif di tahun yang sama!");
 
-        // Aktifkan
         $stmt = $conn->prepare("UPDATE t_wali_kelas SET status_aktif = 1 WHERE id = ?");
         $stmt->bind_param("i", $id);
         $stmt->execute();
@@ -116,7 +113,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan'])) {
         mysqli_begin_transaction($conn);
         $transaksi = true;
 
-        // Validasi
         $stmt = $conn->prepare("SELECT * FROM t_guru WHERE id = ? AND status_aktif = 1");
         $stmt->bind_param("i", $gid); $stmt->execute();
         $guru = $stmt->get_result()->fetch_assoc();
@@ -124,14 +120,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan'])) {
 
         $stmt = $conn->prepare("SELECT id FROM t_kelas WHERE id = ? AND status_aktif = 1");
         $stmt->bind_param("i", $kid); $stmt->execute();
-        if (!$stmt->get_result()->num_rows) throw new Exception("Kelas tidak ditemukan!");
+        if (!$stmt->get_result()->num_rows) throw new Exception("Kelas tidak ditemukan atau sudah dinonaktifkan!");
 
         $stmt = $conn->prepare("SELECT id, tanggal_mulai, tanggal_selesai FROM t_tahun_ajaran WHERE id = ? AND status_aktif = 1");
         $stmt->bind_param("i", $tid); $stmt->execute();
         $tahun = $stmt->get_result()->fetch_assoc();
         if (!$tahun) throw new Exception("Tahun ajaran tidak ditemukan!");
 
-        // Cek duplikat
         $stmt = $conn->prepare("SELECT id FROM t_wali_kelas 
                                 WHERE guru_id = ? AND tahun_ajaran_id = ? AND status_aktif = 1");
         $stmt->bind_param("ii", $gid, $tid); $stmt->execute();
@@ -144,7 +139,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan'])) {
         if ($stmt->get_result()->num_rows)
             throw new Exception("Kelas sudah punya wali kelas di tahun ini!");
 
-        // Email & Akun
         $email = trim($guru['email'] ?? '') ?: ($guru['nip'] ? $guru['nip'].'@sekolah.sch.id' : 'g'.$gid.'@sekolah.sch.id');
         $akun = null;
         if (!empty($guru['user_id'])) {
@@ -197,7 +191,7 @@ $total_aktif = (int)mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) x FR
 $total_tidak_aktif = (int)mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) x FROM t_wali_kelas WHERE status_aktif=0"))['x'];
 
 $result = mysqli_query($conn, "
-    SELECT wk.*, g.nama guru, g.nip, k.nama kelas, ta.nama tahun
+    SELECT wk.*, g.nama guru, g.nip, k.nama kelas, k.status_aktif kelas_status, ta.nama tahun
     FROM t_wali_kelas wk
     LEFT JOIN t_guru g ON wk.guru_id=g.id
     LEFT JOIN t_kelas k ON wk.kelas_id=k.id
@@ -216,7 +210,7 @@ $daftar_k = [];
 $kelas_list = mysqli_query($conn, "SELECT id,nama FROM t_kelas WHERE status_aktif=1 ORDER BY nama");
 while ($k = mysqli_fetch_assoc($kelas_list)) $daftar_k[] = $k;
 
-$tahun_list = mysqli_query($conn, "SELECT id,nama FROM t_tahun_ajaran WHERE status_aktif=1 ORDER BY nama");
+$tahun_terpilih = mysqli_fetch_assoc(mysqli_query($conn, "SELECT id,nama FROM t_tahun_ajaran WHERE nama='2026/2027' LIMIT 1"));
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -225,143 +219,128 @@ $tahun_list = mysqli_query($conn, "SELECT id,nama FROM t_tahun_ajaran WHERE stat
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Kelola Wali Kelas</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdn.datatables.net/2.3.4/css/dataTables.bootstrap5.min.css" rel="stylesheet">
-<style>
-.table td,.table th{vertical-align:middle;white-space:nowrap}
-.rel{position:relative}
-.list{position:absolute;z-index:100;width:100%;max-height:240px;overflow-y:auto;background:#fff;border:1px solid #ced4da;box-shadow:0 4px 12px rgba(0,0,0,.15);display:none}
-.itm{padding:8px 12px;cursor:pointer;border-bottom:1px solid #eee}
-.itm:hover{background:#e3f2fd}
-.sel{margin-top:8px;padding:8px;background:#e3f2fd;border-radius:5px;display:none}
-.baris-tidak-aktif{background-color:#fff9e6 !important}
-.badge-aktif{background:#198754;color:#fff;padding:3px 8px;border-radius:4px;font-size:.75rem}
-.badge-nonaktif{background:#fd7e14;color:#fff;padding:3px 8px;border-radius:4px;font-size:.75rem}
-</style>
 </head>
 <body>
-<div class="container-fluid"><div class="row">
-<?php include "menu.php"; ?>
-<main class="col-md-9 col-lg-10 p-4">
-<h2 class="mb-4">Kelola Wali Kelas</h2>
+<div class="container-fluid">
+    <div class="row">
+        <?php include "menu.php"; ?>
+        <main class="col-md-9 col-lg-10 p-4">
+            <h4 class="mb-4">Kelola Wali Kelas</h4>
 
-<div class="row mb-4 g-3">
-    <div class="col-md-4"><div class="card shadow-sm border-0"><div class="card-body">
-        <h6 class="text-muted">JUMLAH WALI KELAS AKTIF</h6>
-        <h2 class="text-primary fw-bold"><?= $total_aktif ?></h2>
-    </div></div></div>
-    <div class="col-md-4"><div class="card shadow-sm border-0"><div class="card-body">
-        <h6 class="text-muted">JUMLAH TIDAK AKTIF</h6>
-        <h2 class="text-secondary fw-bold"><?= $total_tidak_aktif ?></h2>
-    </div></div></div>
-    <div class="col-md-4"><div class="card shadow-sm border-0"><div class="card-body">
-        <h6 class="text-muted">SISA GURU BELUM JADI WALI</h6>
-        <h2 class="text-success fw-bold"><?= $sisa_g ?></h2>
-    </div></div></div>
-</div>
+            <?= $pesan ?>
 
-<?= $pesan ?>
-
-<div class="card shadow-sm border-0 mb-4"><div class="card-body">
-<h5 class="mb-3">Tetapkan Wali Kelas Baru</h5>
-<?php if (!$sisa_g): ?>
-    <div class="alert alert-info">Semua guru sudah menjadi wali kelas aktif.</div>
-<?php else: ?>
-<form method="POST" class="row g-3">
-    <div class="col-md-4 rel">
-        <label class="form-label">Nama Guru <span class="text-danger">*</span></label>
-        <input type="text" id="cg" class="form-control" placeholder="Ketik nama guru..." autocomplete="off" required>
-        <input type="hidden" name="guru_id" id="gid" required>
-        <div class="sel" id="gs">Dipilih: <span id="gn"></span>
-            <button type="button" class="btn btn-sm btn-outline-secondary ms-2" onclick="rg()">Ubah</button>
-        </div>
-        <div class="list" id="dg">
-            <?php foreach ($daftar_g as $g): ?>
-            <div class="itm" data-id="<?= $g['id'] ?>" data-teks="<?= e(strtolower($g['nama'].' '.$g['nip'])) ?>">
-                <?= e($g['nama']) ?> <small class="text-muted"><?= e($g['nip']) ?></small>
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h6 class="text-muted fs-6">Wali Kelas Aktif</h6>
+                            <h3 class="text-primary fw-bold"><?= $total_aktif ?></h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h6 class="text-muted fs-6">Tidak Aktif / Dicabut</h6>
+                            <h3 class="text-secondary fw-bold"><?= $total_tidak_aktif ?></h3>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <?php endforeach; ?>
-        </div>
-    </div>
-    <div class="col-md-4 rel">
-        <label class="form-label">Kelas <span class="text-danger">*</span></label>
-        <input type="text" id="ck" class="form-control" placeholder="Ketik nama kelas..." autocomplete="off" required>
-        <input type="hidden" name="kelas_id" id="kid" required>
-        <div class="sel" id="ks">Dipilih: <span id="kn"></span>
-            <button type="button" class="btn btn-sm btn-outline-secondary ms-2" onclick="rk()">Ubah</button>
-        </div>
-        <div class="list" id="dk">
-            <?php foreach ($daftar_k as $k): ?>
-            <div class="itm" data-id="<?= $k['id'] ?>" data-teks="<?= e(strtolower($k['nama'])) ?>"><?= e($k['nama']) ?></div>
-            <?php endforeach; ?>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <label class="form-label">Tahun Ajaran <span class="text-danger">*</span></label>
-        <select name="tahun_ajaran_id" class="form-select" required>
-            <option value="">-- Pilih Tahun --</option>
-            <?php while ($t = mysqli_fetch_assoc($tahun_list)): ?>
-            <option value="<?= $t['id'] ?>"><?= e($t['nama']) ?></option>
-            <?php endwhile; ?>
-        </select>
-    </div>
-    <div class="col-12">
-        <button type="submit" name="simpan" class="btn btn-primary">Tetapkan & Buat Akun</button>
-    </div>
-</form>
-<?php endif; ?>
-</div></div>
 
-<div class="card shadow-sm border-0"><div class="card-body">
-<h5 class="mb-3">Daftar Semua Wali Kelas</h5>
-<div class="table-responsive">
-<table id="t" class="table table-bordered table-hover w-100">
-<thead class="table-primary">
-    <tr>
-        <th>No</th><th>Status</th><th>Nama Guru</th><th>NIP/Email</th><th>Kelas</th><th>Tahun</th><th>Aksi</th>
-    </tr>
-</thead>
-<tbody>
-<?php $no=1; while ($r = mysqli_fetch_assoc($result)): ?>
-<tr class="<?= $r['status_aktif']==0?'baris-tidak-aktif':'' ?>">
-    <td><?= $no++ ?></td>
-    <td><?= $r['status_aktif']==1?'<span class="badge-aktif">Aktif</span>':'<span class="badge-nonaktif">Tidak Aktif</span>' ?></td>
-    <td><?= e($r['guru']) ?></td>
-    <td><?= e($r['nip']) ?><br><small class="text-muted"><?= $r['nip']?e($r['nip'].'@sekolah.sch.id'):'-' ?></small></td>
-    <td><?= e($r['kelas']) ?></td>
-    <td><?= e($r['tahun']) ?></td>
-    <td>
-        <?php if ($r['status_aktif']==1): ?>
-            <a href="?hapus=<?= $r['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Cabut status ini?')">Cabut</a>
-        <?php else: ?>
-            <a href="?aktifkan=<?= $r['id'] ?>" class="btn btn-sm btn-success" onclick="return confirm('Aktifkan kembali?')">Aktifkan</a>
-        <?php endif; ?>
-    </td>
-</tr>
-<?php endwhile; ?>
-</tbody>
-</table>
-</div></div></div>
-</main></div></div>
+            <!-- Form Tambah -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">Tetapkan Wali Kelas Baru</div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Guru</label>
+                                <select name="guru_id" class="form-select" required>
+                                    <option value="">-- Pilih Guru --</option>
+                                    <?php foreach ($daftar_g as $g): ?>
+                                    <option value="<?= $g['id'] ?>"><?= e($g['nama']) ?> (<?= e($g['nip']) ?>)</option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <small class="text-muted">Tersedia: <?= $sisa_g ?> guru</small>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Kelas</label>
+                                <select name="kelas_id" class="form-select" required>
+                                    <option value="">-- Pilih Kelas --</option>
+                                    <?php foreach ($daftar_k as $k): ?>
+                                    <option value="<?= $k['id'] ?>"><?= e($k['nama']) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Tahun Ajaran</label>
+                                <select name="tahun_ajaran_id" class="form-select" required>
+                                    <option value="<?= $tahun_terpilih['id'] ?>"><?= e($tahun_terpilih['nama']) ?></option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" name="simpan" class="btn btn-success">Tetapkan Sebagai Wali Kelas</button>
+                    </form>
+                </div>
+            </div>
 
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+            <!-- Daftar Wali Kelas -->
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="mb-3">Daftar Wali Kelas</h5>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped">
+                            <thead class="table-primary text-white">
+                                <tr>
+                                    <th>No</th>
+                                    <th>Guru</th>
+                                    <th>Kelas</th>
+                                    <th>Tahun Ajaran</th>
+                                    <th>Status Wali Kelas</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php $no = 1; while ($row = mysqli_fetch_assoc($result)): 
+                                    $kelas_nama = e($row['kelas'] ?? '-');
+                                    $kelas_aktif = (int)($row['kelas_status'] ?? 1);
+                                    $status_wali = (int)($row['status_aktif'] ?? 0);
+
+                                    if ($kelas_aktif !== 1) {
+                                        $kelas_nama .= ' <span class="badge bg-danger ms-1">KELAS INI DINONAKTIFKAN</span>';
+                                    }
+                                ?>
+                                <tr>
+                                    <td><?= $no++ ?></td>
+                                    <td><?= e($row['guru']) ?></td>
+                                    <td><?= $kelas_nama ?></td>
+                                    <td><?= e($row['tahun']) ?></td>
+                                    <td>
+                                        <?php if ($status_wali === 1): ?>
+                                            <span class="badge bg-success">Aktif</span>
+                                        <?php else: ?>
+                                            <span class="badge bg-secondary">Tidak Aktif</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <?php if ($status_wali === 1): ?>
+                                            <a href="?hapus=<?= $row['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Cabut status wali kelas ini?')">Cabut</a>
+                                        <?php else: ?>
+                                            <a href="?aktifkan=<?= $row['id'] ?>" class="btn btn-sm btn-success">Aktifkan</a>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                                <?php endwhile; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/2.3.4/js/dataTables.bootstrap5.min.js"></script>
-
-<script>
-$(function(){$('#t').DataTable({pageLength:10,language:{search:"Cari:",lengthMenu:"Tampilkan _MENU_ entri",info:"Menampilkan _START_ sampai _END_ dari _TOTAL_ entri",paginate:{previous:"&lt;",next:"&gt;"}}});});
-
-// Pilih Guru
-const cg=document.getElementById('cg'),gid=document.getElementById('gid'),gn=document.getElementById('gn'),dg=document.getElementById('dg'),gs=document.getElementById('gs');
-dg.querySelectorAll('.itm').forEach(i=>i.onclick=()=>{gid.value=i.dataset.id;gn.textContent=i.textContent;dg.style.display='none';cg.style.display='none';gs.style.display='block';});
-cg.oninput=()=>{let v=cg.value.toLowerCase();dg.style.display=v?'block':'none';dg.querySelectorAll('.itm').forEach(i=>i.style.display=i.dataset.teks.includes(v)?'':'none');};
-function rg(){gid.value='';cg.value='';cg.style.display='block';gs.style.display='none';dg.style.display='none';}
-
-// Pilih Kelas
-const ck=document.getElementById('ck'),kid=document.getElementById('kid'),kn=document.getElementById('kn'),dk=document.getElementById('dk'),ks=document.getElementById('ks');
-dk.querySelectorAll('.itm').forEach(i=>i.onclick=()=>{kid.value=i.dataset.id;kn.textContent=i.textContent;dk.style.display='none';ck.style.display='none';ks.style.display='block';});
-ck.oninput=()=>{let v=ck.value.toLowerCase();dk.style.display=v?'block':'none';dk.querySelectorAll('.itm').forEach(i=>i.style.display=i.dataset.teks.includes(v)?'':'none');};
-function rk(){kid.value='';ck.value='';ck.style.display='block';ks.style.display='none';dk.style.display='none';}
-</script>
 </body>
 </html>

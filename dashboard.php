@@ -17,11 +17,12 @@ $query_guru = mysqli_query($conn, "SELECT COUNT(*) AS total FROM t_guru");
 $total_guru = (int)(mysqli_fetch_assoc($query_guru)['total'] ?? 0);
 
 $nama_kelas = '-';
+$kelas_aktif = true;
 $jumlah_siswa_kelas = $pelanggaran_hari_ini = $pelanggaran_bulan_ini = 0;
 
 if ($role === 'wali_kelas') {
     $q = mysqli_query($conn, "
-        SELECT w.kelas_id, k.nama AS nama_kelas
+        SELECT w.kelas_id, k.nama AS nama_kelas, k.status_aktif
         FROM t_wali_kelas w
         JOIN t_kelas k ON w.kelas_id = k.id
         LEFT JOIN t_guru g ON w.guru_id = g.id
@@ -32,6 +33,43 @@ if ($role === 'wali_kelas') {
     if ($q && $r = mysqli_fetch_assoc($q)) {
         $kelas_id = $r['kelas_id'];
         $nama_kelas = $r['nama_kelas'];
+        $kelas_aktif = (int)$r['status_aktif'] === 1;
+
+        // === JIKA KELAS DINONAKTIFKAN ===
+        if (!$kelas_aktif) {
+?>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kelas Dinonaktifkan</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <?php include "menu.php"; ?>
+        <main class="col-md-9 col-lg-10 p-4">
+            <div class="card border-danger shadow-lg mt-5">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0 text-center">AKSES DITOLAK</h4>
+                </div>
+                <div class="card-body text-center p-4">
+                    <h5 class="text-danger mb-3">KELAS ANDA SUDAH DINONAKTIFKAN</h5>
+                    <p class="mb-2">Kelas: <strong><?= htmlspecialchars($nama_kelas) ?></strong></p>
+                    <p class="text-muted mb-4">Data tidak dapat ditampilkan.<br>Silakan hubungi Administrator untuk mengaktifkan kembali.</p>
+                    <a href="logout.php" class="btn btn-primary">Keluar / Login Ulang</a>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+</body>
+</html>
+<?php
+            exit;
+        }
 
         $q_siswa = mysqli_query($conn, "SELECT COUNT(*) AS jumlah FROM t_kelas_siswa WHERE kelas_id = '$kelas_id'");
         if ($q_siswa) $jumlah_siswa_kelas = (int)(mysqli_fetch_assoc($q_siswa)['jumlah'] ?? 0);

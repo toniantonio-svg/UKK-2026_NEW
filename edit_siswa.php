@@ -23,26 +23,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $jenis_kelamin = $_POST['jenis_kelamin'];
     $tanggal_lahir = $_POST['tanggal_lahir'];
     $alamat = trim($_POST['alamat']);
+    $status_aktif = isset($_POST['status_aktif']) ? (int)$_POST['status_aktif'] : 1;
 
-    $cek_nis = mysqli_query($conn, "SELECT id FROM t_siswa WHERE nis = '$nis' AND id != '$id'");
-    if (mysqli_num_rows($cek_nis) > 0) {
-        $pesan = '<div class="alert alert-danger">NIS sudah dipakai siswa lain!</div>';
+    // === VALIDASI NIS: angka saja, maksimal 10 digit ===
+    if (!preg_match('/^[0-9]{1,10}$/', $nis)) {
+        $pesan = '<div class="alert alert-danger">NIS harus berupa angka dan maksimal 10 digit!</div>';
     } else {
-        $update = mysqli_query($conn, "
-            UPDATE t_siswa SET
-                nis = '$nis',
-                nama = '$nama',
-                jenis_kelamin = '$jenis_kelamin',
-                tanggal_lahir = '$tanggal_lahir',
-                alamat = '$alamat',
-                updated_at = NOW()
-            WHERE id = '$id'
-        ");
-        if ($update) {
-            header("Location: siswa.php");
-            exit;
+        // Cek NIS dipakai siswa lain (kecuali dirinya sendiri)
+        $cek_nis = mysqli_query($conn, "SELECT id FROM t_siswa WHERE nis = '$nis' AND id != '$id'");
+        if (mysqli_num_rows($cek_nis) > 0) {
+            $pesan = '<div class="alert alert-danger">NIS sudah dipakai siswa lain!</div>';
         } else {
-            $pesan = '<div class="alert alert-danger">Gagal ubah: ' . mysqli_error($conn) . '</div>';
+            $update = mysqli_query($conn, "
+                UPDATE t_siswa SET
+                    nis = '$nis',
+                    nama = '$nama',
+                    jenis_kelamin = '$jenis_kelamin',
+                    tanggal_lahir = '$tanggal_lahir',
+                    alamat = '$alamat',
+                    status_aktif = '$status_aktif',
+                    updated_at = NOW()
+                WHERE id = '$id'
+            ");
+            if ($update) {
+                header("Location: siswa.php");
+                exit;
+            } else {
+                $pesan = '<div class="alert alert-danger">Gagal ubah: ' . mysqli_error($conn) . '</div>';
+            }
         }
     }
 }
@@ -67,7 +75,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <form method="POST">
                         <div class="mb-3">
                             <label class="form-label">NIS</label>
-                            <input type="text" name="nis" class="form-control" value="<?= htmlspecialchars($siswa['nis']) ?>" required>
+                            <input 
+                                type="text" 
+                                name="nis" 
+                                class="form-control" 
+                                value="<?= htmlspecialchars($siswa['nis']) ?>" 
+                                required
+                                inputmode="numeric"
+                                maxlength="10"
+                                pattern="[0-9]{1,10}"
+                                title="NIS harus berupa angka dan maksimal 10 digit"
+                            >
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Nama Lengkap</label>
@@ -89,6 +107,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <label class="form-label">Alamat</label>
                             <textarea name="alamat" class="form-control" rows="3" required><?= htmlspecialchars($siswa['alamat']) ?></textarea>
                         </div>
+                        
+                        <!-- PILIHAN STATUS AKTIF -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Status Aktif</label>
+                            <select name="status_aktif" class="form-select">
+                                <option value="1" <?= (int)($siswa['status_aktif'] ?? 1) === 1 ? 'selected' : '' ?>>Aktif</option>
+                                <option value="0" <?= (int)($siswa['status_aktif'] ?? 1) === 0 ? 'selected' : '' ?>>Tidak Aktif</option>
+                            </select>
+                        </div>
+                        
                         <a href="siswa.php" class="btn btn-secondary">Kembali</a>
                         <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
                     </form>
