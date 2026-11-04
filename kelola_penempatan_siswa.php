@@ -31,8 +31,21 @@ $result = mysqli_query($conn, "
 ");
 if (!$result) die("Ambil data gagal: " . mysqli_error($conn));
 
-// Data untuk dropdown
-$siswa_list = mysqli_query($conn, "SELECT id, nama FROM t_siswa ORDER BY nama");
+// ==================================================
+// ✅ BAGIAN INI YANG DIUBAH
+// ==================================================
+// Daftar Siswa: HANYA yang BELUM ditempatkan yang muncul
+$siswa_list = mysqli_query($conn, "
+    SELECT id, nama 
+    FROM t_siswa 
+    WHERE status_aktif = 1
+      AND id NOT IN (
+          SELECT DISTINCT siswa_id 
+          FROM t_kelas_siswa
+      )
+    ORDER BY nama ASC
+");
+
 $kelas_list = mysqli_query($conn, "SELECT id, nama FROM t_kelas ORDER BY nama");
 $tahun_list = mysqli_query($conn, "SELECT id, nama FROM t_tahun_ajaran WHERE status_aktif = 1 ORDER BY nama");
 
@@ -158,6 +171,18 @@ if (isset($_GET['ubah'])) {
                                     <?= e($s['nama']) ?>
                                 </option>
                                 <?php endwhile; ?>
+                                
+                                <!-- Jika sedang UBAH, siswa yang sedang diedit tetap muncul -->
+                                <?php if ($edit_data): ?>
+                                    <?php
+                                    $current_siswa = mysqli_fetch_assoc(mysqli_query($conn, "SELECT id, nama FROM t_siswa WHERE id = ".(int)$edit_data['siswa_id']));
+                                    if ($current_siswa):
+                                    ?>
+                                    <option value="<?= $current_siswa['id'] ?>" selected>
+                                        <?= e($current_siswa['nama']) ?>
+                                    </option>
+                                    <?php endif; ?>
+                                <?php endif; ?>
                             </select>
                         </div>
                         
@@ -258,7 +283,6 @@ if (isset($_GET['ubah'])) {
 </div>
 <?php include "footer.php"; ?>
 
-<!-- Sama persis dengan Kelola Guru -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/2.3.4/js/dataTables.bootstrap5.min.js"></script>

@@ -162,9 +162,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <i>Catatan: Siswa akan otomatis ditempatkan di kelas dan tahun ajaran yang dipilih di atas, serta status diaktifkan.</i>
                         </div>
                         <!-- === AKHIR BAGIAN PENEMPATAN === -->
-                        
-                        <a href="siswa.php" class="btn btn-secondary">Kembali</a>
-                        <button type="submit" class="btn btn-success">Simpan Siswa</button>
+                         <div></div>
+                            <button type="submit" class="btn btn-success">Simpan</button>
+                            <a href="siswa.php" class="btn btn-secondary">Kembali</a>
+                        </div>
                     </form>
                 </div>
             </div>

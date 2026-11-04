@@ -128,8 +128,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                             </select>
                         </div>
                         
-                        <button type="submit" class="btn btn-success">Simpan Guru</button>
-                        <a href="guru.php" class="btn btn-secondary">Kembali</a>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">Simpan</button>
+                            <a href="guru.php" class="btn btn-secondary">Kembali</a>
+                        </div>
                     </form>
                 </div>
             </div>

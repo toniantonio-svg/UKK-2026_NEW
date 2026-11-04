@@ -12,7 +12,7 @@ if (empty($id)) {
     exit;
 }
 
-// Cek di tabel t_kelas_siswa — kolomnya kelas_id ✅
+// Cek penempatan siswa
 $cek = $conn->prepare("SELECT COUNT(*) AS total FROM t_kelas_siswa WHERE kelas_id = ?");
 $cek->bind_param("s", $id);
 $cek->execute();
@@ -23,7 +23,12 @@ if ($total > 0) {
     exit;
 }
 
-// Hapus kelas
+// ✅ Hapus dulu wali kelas yang terhubung
+$hapus_wali = $conn->prepare("DELETE FROM t_wali_kelas WHERE kelas_id = ?");
+$hapus_wali->bind_param("s", $id);
+$hapus_wali->execute();
+
+// Baru hapus kelas
 $stmt = $conn->prepare("DELETE FROM t_kelas WHERE id = ?");
 $stmt->bind_param("s", $id);
 

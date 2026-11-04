@@ -97,9 +97,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan'])) {
                         </div>
                         
                         <div class="d-flex gap-2">
-                            <!-- ✅ SUDAH DIPERBAIKI: link ke kelas.php -->
+                            <button type="submit" name="simpan" class="btn btn-success">Simpan</button>
                             <a href="kelas.php" class="btn btn-secondary">Kembali</a>
-                            <button type="submit" name="simpan" class="btn btn-success">Simpan Kelas</button>
                         </div>
                     </form>
                 </div>

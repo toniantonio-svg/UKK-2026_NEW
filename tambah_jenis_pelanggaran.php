@@ -98,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <option value="0" <?= ($_POST['status_aktif'] ?? 1) == 0 ? 'selected' : '' ?>>Tidak Aktif</option>
                             </select>
                         </div>
-                        <button type="submit" class="btn btn-primary">Simpan Pelanggaran</button>
+                        <button type="submit" class="btn btn-primary">Simpan</button>
                         <a href="kelola_jenis_pelanggaran.php" class="btn btn-secondary">Kembali</a>
                     </form>
                 </div>
