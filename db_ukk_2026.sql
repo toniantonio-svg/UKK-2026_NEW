@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 20 Okt 2026 pada 07.17
--- Versi server: 10.4.32-MariaDB
--- Versi PHP: 8.2.12
+-- Generation Time: Nov 04, 2026 at 03:43 AM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -24,7 +24,7 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Struktur dari tabel `t_guru`
+-- Table structure for table `t_guru`
 --
 
 CREATE TABLE `t_guru` (
@@ -39,7 +39,7 @@ CREATE TABLE `t_guru` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data untuk tabel `t_guru`
+-- Dumping data for table `t_guru`
 --
 
 INSERT INTO `t_guru` (`id`, `nip`, `nama`, `email`, `status_aktif`, `user_id`, `created_at`, `updated-at`) VALUES
@@ -92,12 +92,13 @@ INSERT INTO `t_guru` (`id`, `nip`, `nama`, `email`, `status_aktif`, `user_id`, `
 (47, '1985474747', 'dianpermata', 'dianpermata@gmail.com', 1, 97, '2026-09-23 02:34:44', '2026-09-23 02:34:44'),
 (48, '1985484848', 'kasim', 'kasim@gmail.com', 1, 3, '2026-09-23 02:34:44', '2026-09-23 02:34:44'),
 (49, '1985494949', 'intanpermata', 'intanpermata@gmail.com', 1, 4, '2026-09-23 02:34:44', '2026-09-23 02:34:44'),
-(50, '1985505050', 'sumiyati', 'sumiyati@gmail.com', 1, 5, '2026-09-23 02:34:44', '2026-09-23 02:34:44');
+(50, '1985505050', 'sumiyati', 'sumiyati@gmail.com', 1, 5, '2026-09-23 02:34:44', '2026-09-23 02:34:44'),
+(54, '123123128931728937', 'Muhammad Yunus', 'mimawo@gmail.com', 1, 183, '2026-11-04 01:05:11', '2026-11-04 01:05:11');
 
 -- --------------------------------------------------------
 
 --
--- Struktur dari tabel `t_kelas`
+-- Table structure for table `t_kelas`
 --
 
 CREATE TABLE `t_kelas` (
@@ -113,13 +114,13 @@ CREATE TABLE `t_kelas` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data untuk tabel `t_kelas`
+-- Dumping data for table `t_kelas`
 --
 
 INSERT INTO `t_kelas` (`id`, `nama`, `tingkat`, `jurusan`, `status_aktif`, `created_at`, `updated_at`, `update_at`, `maksimal_siswa`) VALUES
 (1, 'X IPA 1', 'X', 'IPA', 1, '2026-09-23 02:37:23', '2026-09-23 09:37:23', '2026-09-23 02:37:23', 25),
 (2, 'XI IPS 1', 'XI', 'IPS', 1, '2026-09-23 02:37:23', '2026-09-23 09:37:23', '2026-09-23 02:37:23', 25),
-(3, 'XII Bahasa 1', 'XII', 'Bahasa', 1, '2026-09-23 02:37:23', '2026-09-23 09:37:23', '2026-09-23 02:37:23', 25),
+(3, 'XII Bahasa 1', 'XII', 'Bahasa', 0, '2026-09-23 02:37:23', '2026-11-04 09:09:18', '2026-09-23 02:37:23', 25),
 (4, 'X TKJ 1', 'X', 'TKJ', 1, '2026-09-23 02:37:23', '2026-09-23 09:37:23', '2026-09-23 02:37:23', 25),
 (5, 'XI RPL 1', 'XI', 'RPL', 1, '2026-09-23 02:37:23', '2026-09-23 09:37:23', '2026-09-23 02:37:23', 25),
 (6, 'XII IPA 2', 'XII', 'IPA', 1, '2026-09-23 02:37:23', '2026-09-23 09:37:23', '2026-09-23 02:37:23', 25),
@@ -167,13 +168,14 @@ INSERT INTO `t_kelas` (`id`, `nama`, `tingkat`, `jurusan`, `status_aktif`, `crea
 (48, 'XII Bahasa 10', 'XII', 'Bahasa', 1, '2026-09-23 02:37:23', '2026-09-23 09:37:23', '2026-09-23 02:37:23', 25),
 (49, 'X TKJ 10', 'X', 'TKJ', 1, '2026-09-23 02:37:23', '2026-09-23 09:37:23', '2026-09-23 02:37:23', 25),
 (50, 'XI RPL 10', 'XI', 'RPL', 1, '2026-09-23 02:37:23', '2026-09-23 09:37:23', '2026-09-23 02:37:23', 25),
-(51, 'X IPA 10', '', '', 0, '2026-10-20 03:10:02', NULL, '2026-10-20 03:10:02', 25),
-(52, 'X IPS 10', '', '', 0, '2026-10-20 03:10:02', NULL, '2026-10-20 03:10:02', 25);
+(51, 'X IPA 10', 'XII', 'ilmu pengetahuan', 0, '2026-10-20 03:10:02', '2026-11-04 09:08:44', '2026-10-20 03:10:02', 25),
+(52, 'X IPS 10', '', '', 0, '2026-10-20 03:10:02', NULL, '2026-10-20 03:10:02', 25),
+(55, 'TKR', 'XII', 'TEKNIK', 1, '2026-11-04 02:01:06', '2026-11-04 09:01:06', '2026-11-04 02:01:06', 26);
 
 -- --------------------------------------------------------
 
 --
--- Struktur dari tabel `t_kelas_siswa`
+-- Table structure for table `t_kelas_siswa`
 --
 
 CREATE TABLE `t_kelas_siswa` (
@@ -189,7 +191,7 @@ CREATE TABLE `t_kelas_siswa` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data untuk tabel `t_kelas_siswa`
+-- Dumping data for table `t_kelas_siswa`
 --
 
 INSERT INTO `t_kelas_siswa` (`id`, `siswa_id`, `tahun_ajaran_id`, `kelas_id`, `tanggal_mulai`, `tanggal_selesai`, `status_aktif`, `created_at`, `updated_at`) VALUES
@@ -572,7 +574,7 @@ INSERT INTO `t_kelas_siswa` (`id`, `siswa_id`, `tahun_ajaran_id`, `kelas_id`, `t
 -- --------------------------------------------------------
 
 --
--- Struktur dari tabel `t_pelanggaran`
+-- Table structure for table `t_pelanggaran`
 --
 
 CREATE TABLE `t_pelanggaran` (
@@ -588,7 +590,7 @@ CREATE TABLE `t_pelanggaran` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data untuk tabel `t_pelanggaran`
+-- Dumping data for table `t_pelanggaran`
 --
 
 INSERT INTO `t_pelanggaran` (`id`, `pelanggaran_kategori_id`, `kode`, `nama`, `poin`, `deskripsi`, `status_aktif`, `created_at`, `updated_at`) VALUES
@@ -646,7 +648,7 @@ INSERT INTO `t_pelanggaran` (`id`, `pelanggaran_kategori_id`, `kode`, `nama`, `p
 -- --------------------------------------------------------
 
 --
--- Struktur dari tabel `t_pelanggaran_kategori`
+-- Table structure for table `t_pelanggaran_kategori`
 --
 
 CREATE TABLE `t_pelanggaran_kategori` (
@@ -660,7 +662,7 @@ CREATE TABLE `t_pelanggaran_kategori` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data untuk tabel `t_pelanggaran_kategori`
+-- Dumping data for table `t_pelanggaran_kategori`
 --
 
 INSERT INTO `t_pelanggaran_kategori` (`id`, `nama`, `deskripsi`, `poin`, `status_aktif`, `created_at`, `updated_at`) VALUES
@@ -718,7 +720,7 @@ INSERT INTO `t_pelanggaran_kategori` (`id`, `nama`, `deskripsi`, `poin`, `status
 -- --------------------------------------------------------
 
 --
--- Struktur dari tabel `t_pelanggaran_siswa`
+-- Table structure for table `t_pelanggaran_siswa`
 --
 
 CREATE TABLE `t_pelanggaran_siswa` (
@@ -745,7 +747,7 @@ CREATE TABLE `t_pelanggaran_siswa` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data untuk tabel `t_pelanggaran_siswa`
+-- Dumping data for table `t_pelanggaran_siswa`
 --
 
 INSERT INTO `t_pelanggaran_siswa` (`id`, `tahun_ajaran_id`, `siswa_id`, `kategori_id`, `nama_siswa`, `kelas_id`, `nama_kelas`, `pelanggaran_id`, `nama_pelanggaran`, `pelanggaran_kategori_id`, `guru_id`, `nama_guru`, `tanggal`, `keterangan`, `poin`, `tindakan`, `status`, `created_at`, `updated_at`, `updated-at`) VALUES
@@ -766,7 +768,7 @@ INSERT INTO `t_pelanggaran_siswa` (`id`, `tahun_ajaran_id`, `siswa_id`, `kategor
 -- --------------------------------------------------------
 
 --
--- Struktur dari tabel `t_siswa`
+-- Table structure for table `t_siswa`
 --
 
 CREATE TABLE `t_siswa` (
@@ -783,7 +785,7 @@ CREATE TABLE `t_siswa` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data untuk tabel `t_siswa`
+-- Dumping data for table `t_siswa`
 --
 
 INSERT INTO `t_siswa` (`id`, `nis`, `nisn`, `nama`, `jenis_kelamin`, `tanggal_lahir`, `alamat`, `status_aktif`, `created_at`, `updated_at`) VALUES
@@ -1141,7 +1143,7 @@ INSERT INTO `t_siswa` (`id`, `nis`, `nisn`, `nama`, `jenis_kelamin`, `tanggal_la
 -- --------------------------------------------------------
 
 --
--- Struktur dari tabel `t_tahun_ajaran`
+-- Table structure for table `t_tahun_ajaran`
 --
 
 CREATE TABLE `t_tahun_ajaran` (
@@ -1155,65 +1157,65 @@ CREATE TABLE `t_tahun_ajaran` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data untuk tabel `t_tahun_ajaran`
+-- Dumping data for table `t_tahun_ajaran`
 --
 
 INSERT INTO `t_tahun_ajaran` (`id`, `nama`, `tanggal_mulai`, `tanggal_selesai`, `status_aktif`, `created_at`, `updated_at`) VALUES
-(1, '2020/2021', '2020-07-01', '2021-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(2, '2021/2022', '2021-07-01', '2022-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(3, '2022/2023', '2022-07-01', '2023-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(4, '2023/2024', '2023-07-01', '2024-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(5, '2024/2025', '2024-07-01', '2025-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(6, '2025/2026', '2025-07-01', '2026-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(7, '2026/2027', '2026-07-01', '2027-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(8, '2027/2028', '2027-07-01', '2028-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(9, '2028/2029', '2028-07-01', '2029-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(10, '2029/2030', '2029-07-01', '2030-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(11, '2030/2031', '2030-07-01', '2031-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(12, '2031/2032', '2031-07-01', '2032-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(13, '2032/2033', '2032-07-01', '2033-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(14, '2033/2034', '2033-07-01', '2034-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(15, '2034/2035', '2034-07-01', '2035-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(16, '2035/2036', '2035-07-01', '2036-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(17, '2036/2037', '2036-07-01', '2037-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(18, '2037/2038', '2037-07-01', '2038-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(19, '2038/2039', '2038-07-01', '2039-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(20, '2039/2040', '2039-07-01', '2040-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(21, '2040/2041', '2040-07-01', '2041-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(22, '2041/2042', '2041-07-01', '2042-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(23, '2042/2043', '2042-07-01', '2043-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(24, '2043/2044', '2043-07-01', '2044-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(25, '2044/2045', '2044-07-01', '2045-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(26, '2045/2046', '2045-07-01', '2046-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(27, '2046/2047', '2046-07-01', '2047-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(28, '2047/2048', '2047-07-01', '2048-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(29, '2048/2049', '2048-07-01', '2049-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(30, '2049/2050', '2049-07-01', '2050-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(31, '2050/2051', '2050-07-01', '2051-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(32, '2051/2052', '2051-07-01', '2052-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(33, '2052/2053', '2052-07-01', '2053-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(34, '2053/2054', '2053-07-01', '2054-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(35, '2054/2055', '2054-07-01', '2055-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(36, '2055/2056', '2055-07-01', '2056-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(37, '2056/2057', '2056-07-01', '2057-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(38, '2057/2058', '2057-07-01', '2058-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(39, '2058/2059', '2058-07-01', '2059-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(40, '2059/2060', '2059-07-01', '2060-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(41, '2060/2061', '2060-07-01', '2061-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(42, '2061/2062', '2061-07-01', '2062-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(43, '2062/2063', '2062-07-01', '2063-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(44, '2063/2064', '2063-07-01', '2064-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(45, '2064/2065', '2064-07-01', '2065-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(46, '2065/2066', '2065-07-01', '2066-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(47, '2066/2067', '2066-07-01', '2067-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(48, '2067/2068', '2067-07-01', '2068-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(49, '2068/2069', '2068-07-01', '2069-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09'),
-(50, '2069/2070', '2069-07-01', '2070-06-30', 1, '2026-09-23 02:24:09', '2026-09-23 02:24:09');
+(1, '2020/2021', '2020-07-01', '2021-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(2, '2021/2022', '2021-07-01', '2022-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(3, '2022/2023', '2022-07-01', '2023-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(4, '2023/2024', '2023-07-01', '2024-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(5, '2024/2025', '2024-07-01', '2025-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(6, '2025/2026', '2025-07-01', '2026-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(7, '2026/2027', '2026-07-01', '2027-06-30', 1, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(8, '2027/2028', '2027-07-01', '2028-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(9, '2028/2029', '2028-07-01', '2029-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(10, '2029/2030', '2029-07-01', '2030-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(11, '2030/2031', '2030-07-01', '2031-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(12, '2031/2032', '2031-07-01', '2032-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(13, '2032/2033', '2032-07-01', '2033-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(14, '2033/2034', '2033-07-01', '2034-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(15, '2034/2035', '2034-07-01', '2035-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(16, '2035/2036', '2035-07-01', '2036-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(17, '2036/2037', '2036-07-01', '2037-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(18, '2037/2038', '2037-07-01', '2038-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(19, '2038/2039', '2038-07-01', '2039-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(20, '2039/2040', '2039-07-01', '2040-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(21, '2040/2041', '2040-07-01', '2041-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(22, '2041/2042', '2041-07-01', '2042-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(23, '2042/2043', '2042-07-01', '2043-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(24, '2043/2044', '2043-07-01', '2044-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(25, '2044/2045', '2044-07-01', '2045-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(26, '2045/2046', '2045-07-01', '2046-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(27, '2046/2047', '2046-07-01', '2047-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(28, '2047/2048', '2047-07-01', '2048-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(29, '2048/2049', '2048-07-01', '2049-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(30, '2049/2050', '2049-07-01', '2050-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(31, '2050/2051', '2050-07-01', '2051-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(32, '2051/2052', '2051-07-01', '2052-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(33, '2052/2053', '2052-07-01', '2053-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(34, '2053/2054', '2053-07-01', '2054-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(35, '2054/2055', '2054-07-01', '2055-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(36, '2055/2056', '2055-07-01', '2056-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(37, '2056/2057', '2056-07-01', '2057-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(38, '2057/2058', '2057-07-01', '2058-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(39, '2058/2059', '2058-07-01', '2059-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(40, '2059/2060', '2059-07-01', '2060-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(41, '2060/2061', '2060-07-01', '2061-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(42, '2061/2062', '2061-07-01', '2062-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(43, '2062/2063', '2062-07-01', '2063-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(44, '2063/2064', '2063-07-01', '2064-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(45, '2064/2065', '2064-07-01', '2065-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(46, '2065/2066', '2065-07-01', '2066-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(47, '2066/2067', '2066-07-01', '2067-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(48, '2067/2068', '2067-07-01', '2068-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(49, '2068/2069', '2068-07-01', '2069-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12'),
+(50, '2069/2070', '2069-07-01', '2070-06-30', 0, '2026-09-23 02:24:09', '2026-11-04 02:41:12');
 
 -- --------------------------------------------------------
 
 --
--- Struktur dari tabel `t_users`
+-- Table structure for table `t_users`
 --
 
 CREATE TABLE `t_users` (
@@ -1229,7 +1231,7 @@ CREATE TABLE `t_users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data untuk tabel `t_users`
+-- Dumping data for table `t_users`
 --
 
 INSERT INTO `t_users` (`id`, `name`, `email`, `email_verified_at`, `password`, `remember_token`, `role`, `created_at`, `updated_at`) VALUES
@@ -1239,7 +1241,7 @@ INSERT INTO `t_users` (`id`, `name`, `email`, `email_verified_at`, `password`, `
 (4, 'administrator4', 'admin04@sekolah.test', '2026-09-23 02:23:41', 'admin123', '', 'admin', '2026-09-23 02:23:41', '2026-09-23 02:23:41'),
 (5, 'administrator5', 'admin05@sekolah.test', '2026-09-23 02:23:41', 'admin123', '', 'admin', '2026-09-23 02:23:41', '2026-09-23 02:23:41'),
 (51, 'sriwahyuningtias', '1985010101@sekolah.sch.id', '2026-10-19 07:34:39', 'guru123', '', 'guru', '2026-10-19 07:34:39', '2026-10-19 07:34:39'),
-(52, 'budisantoso', '1985020202@sekolah.sch.id', '2026-10-19 07:34:39', 'guru123', '', 'wali_kelas', '2026-10-19 07:34:39', '2026-10-19 07:34:39'),
+(52, 'budisantoso', '1985020202@sekolah.sch.id', '2026-10-19 07:34:39', 'guru123', '', 'guru', '2026-10-19 07:34:39', '2026-10-19 07:34:39'),
 (53, 'sitiaisyah', '1985030303@sekolah.sch.id', '2026-10-19 07:34:39', 'guru123', '', 'wali_kelas', '2026-10-19 07:34:39', '2026-10-19 07:34:39'),
 (54, 'sugiarto', '1985040404@sekolah.sch.id', '2026-10-19 07:34:39', 'guru123', '', 'guru', '2026-10-19 07:34:39', '2026-10-19 07:34:39'),
 (55, 'dewilestari', '1985050505@sekolah.sch.id', '2026-10-19 07:34:39', 'guru123', '', 'guru', '2026-10-19 07:34:39', '2026-10-19 07:34:39'),
@@ -1337,12 +1339,13 @@ INSERT INTO `t_users` (`id`, `name`, `email`, `email_verified_at`, `password`, `
 (163, 'dianpermata', '1985474747@sekolah.sch.id', '2026-10-19 07:58:01', 'guru123', '', 'guru', '2026-10-19 07:58:01', '2026-10-19 07:58:01'),
 (164, 'kasim', '1985484848@sekolah.sch.id', '2026-10-19 07:58:01', 'guru123', '', 'guru', '2026-10-19 07:58:01', '2026-10-19 07:58:01'),
 (165, 'intanpermata', '1985494949@sekolah.sch.id', '2026-10-19 07:58:01', 'guru123', '', 'guru', '2026-10-19 07:58:01', '2026-10-19 07:58:01'),
-(166, 'sumiyati', '1985505050@sekolah.sch.id', '2026-10-19 07:58:01', 'guru123', '', 'guru', '2026-10-19 07:58:01', '2026-10-19 07:58:01');
+(166, 'sumiyati', '1985505050@sekolah.sch.id', '2026-10-19 07:58:01', 'guru123', '', 'guru', '2026-10-19 07:58:01', '2026-10-19 07:58:01'),
+(183, 'Muhammad Yunus', 'mimawo@gmail.com', '2026-11-04 01:05:11', 'Yunus', '', 'wali_kelas', '2026-11-04 01:05:11', '2026-11-04 01:05:11');
 
 -- --------------------------------------------------------
 
 --
--- Struktur dari tabel `t_wali_kelas`
+-- Table structure for table `t_wali_kelas`
 --
 
 CREATE TABLE `t_wali_kelas` (
@@ -1358,37 +1361,38 @@ CREATE TABLE `t_wali_kelas` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data untuk tabel `t_wali_kelas`
+-- Dumping data for table `t_wali_kelas`
 --
 
 INSERT INTO `t_wali_kelas` (`id`, `tahun_ajaran_id`, `kelas_id`, `guru_id`, `tanggal_mulai`, `tanggal_selesai`, `status_aktif`, `created_at`, `updated_at`) VALUES
-(2, 2, 2, 2, '2021-07-01', '2022-06-30', 1, '2026-09-23 02:37:57', '2026-09-23 02:37:57'),
+(2, 2, 2, 2, '2021-07-01', '2022-06-30', 0, '2026-09-23 02:37:57', '2026-09-23 02:37:57'),
 (3, 3, 3, 3, '2022-07-01', '2023-06-30', 1, '2026-09-23 02:37:57', '2026-09-23 02:37:57'),
 (7, 7, 7, 7, '2026-07-01', '2027-06-30', 1, '2026-09-23 02:37:57', '2026-09-23 02:37:57'),
 (44, 44, 44, 44, '2063-07-01', '2064-06-30', 0, '2026-09-23 02:37:57', '2026-09-23 02:37:57'),
 (45, 45, 45, 45, '2064-07-01', '2065-06-30', 0, '2026-09-23 02:37:57', '2026-09-23 02:37:57'),
 (46, 46, 46, 46, '2065-07-01', '2066-06-30', 0, '2026-09-23 02:37:57', '2026-09-23 02:37:57'),
-(47, 47, 47, 47, '2066-07-01', '2067-06-30', 0, '2026-09-23 02:37:57', '2026-09-23 02:37:57');
+(47, 47, 47, 47, '2066-07-01', '2067-06-30', 0, '2026-09-23 02:37:57', '2026-09-23 02:37:57'),
+(51, 7, 9, 54, '2026-07-01', '2027-06-30', 1, '2026-11-04 01:35:38', '2026-11-04 01:35:38');
 
 --
 -- Indexes for dumped tables
 --
 
 --
--- Indeks untuk tabel `t_guru`
+-- Indexes for table `t_guru`
 --
 ALTER TABLE `t_guru`
   ADD PRIMARY KEY (`id`),
   ADD KEY `user_id` (`user_id`);
 
 --
--- Indeks untuk tabel `t_kelas`
+-- Indexes for table `t_kelas`
 --
 ALTER TABLE `t_kelas`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indeks untuk tabel `t_kelas_siswa`
+-- Indexes for table `t_kelas_siswa`
 --
 ALTER TABLE `t_kelas_siswa`
   ADD PRIMARY KEY (`id`),
@@ -1397,20 +1401,20 @@ ALTER TABLE `t_kelas_siswa`
   ADD KEY `kelas_id` (`kelas_id`);
 
 --
--- Indeks untuk tabel `t_pelanggaran`
+-- Indexes for table `t_pelanggaran`
 --
 ALTER TABLE `t_pelanggaran`
   ADD PRIMARY KEY (`id`),
   ADD KEY `pelanggaran_kategori_id` (`pelanggaran_kategori_id`);
 
 --
--- Indeks untuk tabel `t_pelanggaran_kategori`
+-- Indexes for table `t_pelanggaran_kategori`
 --
 ALTER TABLE `t_pelanggaran_kategori`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indeks untuk tabel `t_pelanggaran_siswa`
+-- Indexes for table `t_pelanggaran_siswa`
 --
 ALTER TABLE `t_pelanggaran_siswa`
   ADD PRIMARY KEY (`id`),
@@ -1422,25 +1426,25 @@ ALTER TABLE `t_pelanggaran_siswa`
   ADD KEY `kelas_id` (`kelas_id`);
 
 --
--- Indeks untuk tabel `t_siswa`
+-- Indexes for table `t_siswa`
 --
 ALTER TABLE `t_siswa`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indeks untuk tabel `t_tahun_ajaran`
+-- Indexes for table `t_tahun_ajaran`
 --
 ALTER TABLE `t_tahun_ajaran`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indeks untuk tabel `t_users`
+-- Indexes for table `t_users`
 --
 ALTER TABLE `t_users`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indeks untuk tabel `t_wali_kelas`
+-- Indexes for table `t_wali_kelas`
 --
 ALTER TABLE `t_wali_kelas`
   ADD PRIMARY KEY (`id`),
@@ -1450,81 +1454,81 @@ ALTER TABLE `t_wali_kelas`
   ADD KEY `kelas_id` (`kelas_id`);
 
 --
--- AUTO_INCREMENT untuk tabel yang dibuang
+-- AUTO_INCREMENT for dumped tables
 --
 
 --
--- AUTO_INCREMENT untuk tabel `t_guru`
+-- AUTO_INCREMENT for table `t_guru`
 --
 ALTER TABLE `t_guru`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55;
 
 --
--- AUTO_INCREMENT untuk tabel `t_kelas`
+-- AUTO_INCREMENT for table `t_kelas`
 --
 ALTER TABLE `t_kelas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
 
 --
--- AUTO_INCREMENT untuk tabel `t_kelas_siswa`
+-- AUTO_INCREMENT for table `t_kelas_siswa`
 --
 ALTER TABLE `t_kelas_siswa`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1904;
 
 --
--- AUTO_INCREMENT untuk tabel `t_pelanggaran`
+-- AUTO_INCREMENT for table `t_pelanggaran`
 --
 ALTER TABLE `t_pelanggaran`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
 
 --
--- AUTO_INCREMENT untuk tabel `t_pelanggaran_kategori`
+-- AUTO_INCREMENT for table `t_pelanggaran_kategori`
 --
 ALTER TABLE `t_pelanggaran_kategori`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
 
 --
--- AUTO_INCREMENT untuk tabel `t_pelanggaran_siswa`
+-- AUTO_INCREMENT for table `t_pelanggaran_siswa`
 --
 ALTER TABLE `t_pelanggaran_siswa`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
 
 --
--- AUTO_INCREMENT untuk tabel `t_siswa`
+-- AUTO_INCREMENT for table `t_siswa`
 --
 ALTER TABLE `t_siswa`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=876;
 
 --
--- AUTO_INCREMENT untuk tabel `t_tahun_ajaran`
+-- AUTO_INCREMENT for table `t_tahun_ajaran`
 --
 ALTER TABLE `t_tahun_ajaran`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
 
 --
--- AUTO_INCREMENT untuk tabel `t_users`
+-- AUTO_INCREMENT for table `t_users`
 --
 ALTER TABLE `t_users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=180;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=184;
 
 --
--- AUTO_INCREMENT untuk tabel `t_wali_kelas`
+-- AUTO_INCREMENT for table `t_wali_kelas`
 --
 ALTER TABLE `t_wali_kelas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
 
 --
--- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)
+-- Constraints for dumped tables
 --
 
 --
--- Ketidakleluasaan untuk tabel `t_guru`
+-- Constraints for table `t_guru`
 --
 ALTER TABLE `t_guru`
   ADD CONSTRAINT `fk_guru_user` FOREIGN KEY (`user_id`) REFERENCES `t_users` (`id`) ON UPDATE CASCADE;
 
 --
--- Ketidakleluasaan untuk tabel `t_kelas_siswa`
+-- Constraints for table `t_kelas_siswa`
 --
 ALTER TABLE `t_kelas_siswa`
   ADD CONSTRAINT `t_kelas_siswa_ibfk_1` FOREIGN KEY (`tahun_ajaran_id`) REFERENCES `t_tahun_ajaran` (`id`) ON UPDATE CASCADE,
@@ -1532,13 +1536,13 @@ ALTER TABLE `t_kelas_siswa`
   ADD CONSTRAINT `t_kelas_siswa_ibfk_3` FOREIGN KEY (`kelas_id`) REFERENCES `t_kelas` (`id`) ON UPDATE CASCADE;
 
 --
--- Ketidakleluasaan untuk tabel `t_pelanggaran`
+-- Constraints for table `t_pelanggaran`
 --
 ALTER TABLE `t_pelanggaran`
   ADD CONSTRAINT `t_pelanggaran_ibfk_1` FOREIGN KEY (`pelanggaran_kategori_id`) REFERENCES `t_pelanggaran_kategori` (`id`) ON UPDATE CASCADE;
 
 --
--- Ketidakleluasaan untuk tabel `t_pelanggaran_siswa`
+-- Constraints for table `t_pelanggaran_siswa`
 --
 ALTER TABLE `t_pelanggaran_siswa`
   ADD CONSTRAINT `t_pelanggaran_siswa_ibfk_1` FOREIGN KEY (`guru_id`) REFERENCES `t_guru` (`id`) ON UPDATE CASCADE,
@@ -1549,7 +1553,7 @@ ALTER TABLE `t_pelanggaran_siswa`
   ADD CONSTRAINT `t_pelanggaran_siswa_ibfk_6` FOREIGN KEY (`kelas_id`) REFERENCES `t_kelas` (`id`) ON UPDATE CASCADE;
 
 --
--- Ketidakleluasaan untuk tabel `t_wali_kelas`
+-- Constraints for table `t_wali_kelas`
 --
 ALTER TABLE `t_wali_kelas`
   ADD CONSTRAINT `t_wali_kelas_ibfk_2` FOREIGN KEY (`tahun_ajaran_id`) REFERENCES `t_tahun_ajaran` (`id`) ON UPDATE CASCADE,

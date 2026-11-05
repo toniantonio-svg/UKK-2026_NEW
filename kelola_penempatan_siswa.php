@@ -31,9 +31,6 @@ $result = mysqli_query($conn, "
 ");
 if (!$result) die("Ambil data gagal: " . mysqli_error($conn));
 
-// ==================================================
-// ✅ BAGIAN INI YANG DIUBAH
-// ==================================================
 // Daftar Siswa: HANYA yang BELUM ditempatkan yang muncul
 $siswa_list = mysqli_query($conn, "
     SELECT id, nama 
@@ -46,7 +43,9 @@ $siswa_list = mysqli_query($conn, "
     ORDER BY nama ASC
 ");
 
-$kelas_list = mysqli_query($conn, "SELECT id, nama FROM t_kelas ORDER BY nama");
+// ✅ DIUBAH: HANYA kelas yang AKTIF yang muncul di pilihan
+$kelas_list = mysqli_query($conn, "SELECT id, nama FROM t_kelas WHERE status_aktif = 1 ORDER BY nama");
+
 $tahun_list = mysqli_query($conn, "SELECT id, nama FROM t_tahun_ajaran WHERE status_aktif = 1 ORDER BY nama");
 
 // Proses simpan / ubah
@@ -199,6 +198,18 @@ if (isset($_GET['ubah'])) {
                                     <?= e($k['nama']) ?>
                                 </option>
                                 <?php endwhile; ?>
+                                
+                                <!-- ✅ Jika UBAH, kelas yang sedang dipilih tetap muncul meskipun tidak aktif -->
+                                <?php if ($edit_data): ?>
+                                    <?php
+                                    $current_kelas = mysqli_fetch_assoc(mysqli_query($conn, "SELECT id, nama FROM t_kelas WHERE id = ".(int)$edit_data['kelas_id']));
+                                    if ($current_kelas):
+                                    ?>
+                                    <option value="<?= $current_kelas['id'] ?>" selected>
+                                        <?= e($current_kelas['nama']) ?>
+                                    </option>
+                                    <?php endif; ?>
+                                <?php endif; ?>
                             </select>
                         </div>
                         

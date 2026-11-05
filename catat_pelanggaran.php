@@ -65,7 +65,7 @@ if ($blokir) {
         <main class="col-md-9 col-lg-10 p-4">
             <div class="card border-danger shadow-lg mt-5">
                 <div class="card-header bg-danger text-white">
-                    <h4 class="mb-0 text-center">⚠️ AKSES DITOLAK</h4>
+                    <h4 class="mb-0 text-center">AKSES DITOLAK</h4>
                 </div>
                 <div class="card-body text-center p-4">
                     <h5 class="text-danger mb-3">KELAS ANDA SUDAH DINONAKTIFKAN</h5>

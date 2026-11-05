@@ -7,22 +7,18 @@ cek_login();
 $nama = $_SESSION['name'];
 $role = strtolower(trim($_SESSION['role']));
 
-// Fungsi bantu tampil aman
 function e($val) {
     return htmlspecialchars((string)$val, ENT_QUOTES, 'UTF-8');
 }
 
-// === Hak Akses ===
 if (!in_array($role, ['admin', 'wali_kelas', 'guru'])) {
     echo "<script>alert('Anda tidak berhak mengakses halaman ini!');location.href='dashboard.php';</script>";
     exit;
 }
 
-// === Proses Hapus ===
 if (isset($_GET['hapus']) && is_numeric($_GET['hapus'])) {
     $id_hapus = (int)$_GET['hapus'];
 
-    // Wali kelas cek kepemilikan
     if ($role === 'wali_kelas') {
         $cek = mysqli_query($conn, "
             SELECT 1 FROM t_pelanggaran_siswa p
@@ -46,7 +42,6 @@ if (isset($_GET['hapus']) && is_numeric($_GET['hapus'])) {
     exit;
 }
 
-// === Data Kelas Wali + CEK STATUS ===
 $kelas_id = 0;
 $nama_kelas = '';
 $kelas_aktif = true;
@@ -66,7 +61,6 @@ if ($role === 'wali_kelas') {
         $nama_kelas = $r['nama_kelas'];
         $kelas_aktif = (int)$r['status_aktif'] === 1;
 
-        // === JIKA KELAS DINONAKTIFKAN — BLOKIR AKSES ===
         if (!$kelas_aktif) {
 ?>
 <!DOCTYPE html>
@@ -99,19 +93,19 @@ if ($role === 'wali_kelas') {
 </body>
 </html>
 <?php
-            exit;
-        }
+        exit;
     }
 }
+}
 
-// === Query Riwayat ===
+// === Query DIPERBAIKI — pakai nama kolom pelanggaran_kategori_id ===
 if ($role === 'wali_kelas' && $kelas_id) {
     $sql = "
         SELECT p.id, s.nis, s.nama AS nama_siswa,
                k.nama AS kategori, p.poin, p.keterangan, p.created_at AS tanggal
         FROM t_pelanggaran_siswa p
         LEFT JOIN t_siswa s ON p.siswa_id = s.id
-        LEFT JOIN t_pelanggaran_kategori k ON p.kategori_id = k.id
+        LEFT JOIN t_pelanggaran_kategori k ON p.pelanggaran_kategori_id = k.id -- ✅ NAMA KOLOM BENAR
         LEFT JOIN t_kelas_siswa ks ON s.id = ks.siswa_id
         WHERE ks.kelas_id = $kelas_id
         ORDER BY p.created_at DESC, p.id DESC
@@ -122,7 +116,7 @@ if ($role === 'wali_kelas' && $kelas_id) {
                k.nama AS kategori, p.poin, p.keterangan, p.created_at AS tanggal
         FROM t_pelanggaran_siswa p
         LEFT JOIN t_siswa s ON p.siswa_id = s.id
-        LEFT JOIN t_pelanggaran_kategori k ON p.kategori_id = k.id
+        LEFT JOIN t_pelanggaran_kategori k ON p.pelanggaran_kategori_id = k.id -- ✅ NAMA KOLOM BENAR
         ORDER BY p.created_at DESC, p.id DESC
     ";
 }

@@ -116,9 +116,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <option value="0" <?= (int)($siswa['status_aktif'] ?? 1) === 0 ? 'selected' : '' ?>>Tidak Aktif</option>
                             </select>
                         </div>
-                        
-                        <a href="siswa.php" class="btn btn-secondary">Kembali</a>
-                        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                        <div>
+                            <button type="submit" class="btn btn-primary">Simpan</button>
+                            <a href="siswa.php" class="btn btn-secondary">Kembali</a>
+                        </div>
                     </form>
                 </div>
             </div>

@@ -72,12 +72,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan'])) {
                 <div class="card-body">
                     <form method="POST">
                         <div class="mb-3">
-                            <label class="form-label">Nama Kelas <span class="text-danger">*</span></label>
+                            <label class="form-label">Nama Kelas</span></label>
                             <input type="text" name="nama" class="form-control" placeholder="Contoh: X IPA 1" required>
                         </div>
                         
                         <div class="mb-3">
-                            <label class="form-label">Tingkat <span class="text-danger">*</span></label>
+                            <label class="form-label">Tingkat</label>
                             <select name="tingkat" class="form-select" required>
                                 <option value="">-- Pilih Tingkat --</option>
                                 <option value="X">X</option>
@@ -87,7 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan'])) {
                         </div>
                         
                         <div class="mb-3">
-                            <label class="form-label">Jurusan <span class="text-danger">*</span></label>
+                            <label class="form-label">Jurusan</label>
                             <input type="text" name="jurusan" class="form-control" placeholder="Contoh: IPA / IPS / TKJ / RPL" required>
                         </div>
                         

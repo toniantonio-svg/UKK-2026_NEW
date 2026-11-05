@@ -11,12 +11,11 @@ function e($value) {
 
 // === HITUNG TOTAL, AKTIF & TIDAK AKTIF ===
 $total_guru = (int)mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS total FROM t_guru"))['total'];
-
 $aktif_guru = (int)mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS total FROM t_guru WHERE status_aktif = 1"))['total'];
-
 $nonaktif_guru = (int)mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS total FROM t_guru WHERE status_aktif = 0 OR status_aktif IS NULL"))['total'];
 
-$result = mysqli_query($conn, "SELECT * FROM t_guru ORDER BY id ASC");
+// ✅ Urut ID User dari TERKECIL ke TERBESAR
+$result = mysqli_query($conn, "SELECT * FROM t_guru ORDER BY user_id ASC, id ASC");
 if (!$result) die("Pengambilan data guru gagal: " . mysqli_error($conn));
 
 $kolom_updated = null;
@@ -94,7 +93,9 @@ mysqli_data_seek($result, 0);
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php $no = 1; while ($row = mysqli_fetch_assoc($result)):
+                                <?php 
+                                $no = 1;
+                                while ($row = mysqli_fetch_assoc($result)):
                                     $nilai_updated = $kolom_updated ? ($row[$kolom_updated] ?? '') : '';
                                     if (empty($nilai_updated) || $nilai_updated === '0000-00-00 00:00:00') {
                                         $nilai_updated = $row['created_at'] ?? '-';
@@ -146,13 +147,21 @@ $(document).ready(function () {
         language: { url: 'https://cdn.datatables.net/plug-ins/2.3.4/i18n/id.json' },
         pageLength: 10,
         lengthMenu: [[5,10,25,50,100,-1],[5,10,25,50,100,'Semua']],
-        order: [[1,'asc']],
+        order: [], // Ikuti urutan dari SQL
         columnDefs: [
-            { targets: [0,8], orderable:false, searchable:false },
-            { targets: [0,4,5,8], className:'text-center' }
+            { targets: [0,8], orderable: false, searchable: false },
+            { targets: [0,4,5,8], className: 'text-center' }
         ],
         autoWidth: false,
-        layout: { topStart:'pageLength', topEnd:'search', bottomStart:'info', bottomEnd:'paging' }
+        layout: { topStart:'pageLength', topEnd:'search', bottomStart:'info', bottomEnd:'paging' },
+        drawCallback: function() {
+            // Nomor urut selalu 1, 2, 3... tiap halaman
+            var api = this.api();
+            var start = api.page.info().start;
+            api.column(0, {page:'current'}).nodes().each(function(cell, i) {
+                cell.innerHTML = start + i + 1;
+            });
+        }
     });
 });
 </script>
