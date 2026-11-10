@@ -207,8 +207,20 @@ while ($g = mysqli_fetch_assoc($guru_list)) $daftar_g[] = $g;
 $sisa_g = count($daftar_g);
 
 $daftar_k = [];
-$kelas_list = mysqli_query($conn, "SELECT id,nama FROM t_kelas WHERE status_aktif=1 ORDER BY nama");
+$kelas_list = mysqli_query($conn, "
+    SELECT k.id, k.nama 
+    FROM t_kelas k
+    WHERE k.status_aktif = 1
+      AND k.id NOT IN (
+          SELECT wk.kelas_id 
+          FROM t_wali_kelas wk
+          WHERE wk.status_aktif = 1
+            AND wk.kelas_id IS NOT NULL
+      )
+    ORDER BY k.nama
+");
 while ($k = mysqli_fetch_assoc($kelas_list)) $daftar_k[] = $k;
+
 
 $tahun_terpilih = mysqli_fetch_assoc(mysqli_query($conn, "SELECT id,nama FROM t_tahun_ajaran WHERE nama='2026/2027' LIMIT 1"));
 ?>

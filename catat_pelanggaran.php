@@ -11,9 +11,10 @@ function e($v) {
 }
 
 $nama = $_SESSION['name'];
-$role = strtolower(trim($_SESSION['role']));
+$role = strtolower(trim($_SESSION['role'] ?? ''));
+$guru_id = (int)($_SESSION['guru_id'] ?? 0);
 
-if (!in_array($role, ['guru', 'wali_kelas'])) {
+if (!in_array($role, ['guru', 'wali_kelas', 'admin'])) {
     echo "<script>alert('Anda tidak berhak!');location.href='dashboard.php';</script>";
     exit;
 }
@@ -36,18 +37,15 @@ if ($role === 'wali_kelas') {
         if (!$kelas_aktif) {
             $blokir = true;
         }
-        // Wali kelas → hanya satu kelas
         $daftar_kelas[] = ['id' => $kelas_id, 'nama' => $nama_kelas];
     }
 } else {
-    // Guru → ambil SEMUA kelas aktif
     $q = mysqli_query($conn, "SELECT id, nama FROM t_kelas WHERE status_aktif = 1 ORDER BY nama");
     while ($r = mysqli_fetch_assoc($q)) {
         $daftar_kelas[] = $r;
     }
 }
 
-// === JIKA KELAS DINONAKTIFKAN — TAMPILKAN PESAN & KELUAR ===
 if ($blokir) {
 ?>
 <!DOCTYPE html>
@@ -83,19 +81,19 @@ if ($blokir) {
     exit;
 }
 
-// === AMBIL SEMUA SISWA DENGAN INFORMASI KELAS ===
+// === AMBIL SEMUA SISWA ===
 $semua_siswa = [];
 if ($role === 'wali_kelas' && $kelas_id > 0) {
     $q_s = mysqli_query($conn, "SELECT s.id, s.nama, s.nis, ks.kelas_id 
-                                  FROM t_siswa s 
-                                  INNER JOIN t_kelas_siswa ks ON s.id = ks.siswa_id 
-                                  WHERE ks.kelas_id = '$kelas_id' 
-                                  ORDER BY s.nama");
+                                FROM t_siswa s 
+                                INNER JOIN t_kelas_siswa ks ON s.id = ks.siswa_id 
+                                WHERE ks.kelas_id = $kelas_id 
+                                ORDER BY s.nama");
 } else {
     $q_s = mysqli_query($conn, "SELECT s.id, s.nama, s.nis, ks.kelas_id 
-                                  FROM t_siswa s 
-                                  INNER JOIN t_kelas_siswa ks ON s.id = ks.siswa_id 
-                                  ORDER BY ks.kelas_id, s.nama");
+                                FROM t_siswa s 
+                                INNER JOIN t_kelas_siswa ks ON s.id = ks.siswa_id 
+                                ORDER BY ks.kelas_id, s.nama");
 }
 if ($q_s) {
     while ($r = mysqli_fetch_assoc($q_s)) {
@@ -115,7 +113,6 @@ $pesan = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['siswa_id'])) {
     $sid = (int)$_POST['siswa_id'];
     $kid = (int)($_POST['kategori_id'] ?? 0);
-    $kelas_terpilih = (int)($_POST['kelas_id'] ?? 0);
     $ket = trim($_POST['keterangan'] ?? '');
     $poin = 0;
 
@@ -147,10 +144,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['siswa_id'])) {
     }
 
     if (!$pesan) {
-        $s = $conn->prepare("INSERT INTO t_pelanggaran_siswa (siswa_id, pelanggaran_kategori_id, keterangan, poin, created_at) VALUES (?, ?, ?, ?, NOW())");
-        $s->bind_param("iisi", $sid, $kid, $ket, $poin);
+        // === SIMPAN DENGAN guru_id ===
+        $s = $conn->prepare("INSERT INTO t_pelanggaran_siswa 
+            (siswa_id, kategori_id, keterangan, poin, guru_id, created_at) 
+            VALUES (?, ?, ?, ?, ?, NOW())");
+        $s->bind_param("iisii", $sid, $kid, $ket, $poin, $guru_id);
+        
         if ($s->execute()) {
-            $pesan = '<div class="alert alert-success">Berhasil disimpan! Poin: ' . $poin . '</div>';
+            $pesan = '<div class="alert alert-success">✅ Berhasil disimpan! Poin: ' . $poin . ' — Data tercatat atas nama Anda.</div>';
         } else {
             $pesan = '<div class="alert alert-danger">Gagal simpan: ' . e($s->error) . '</div>';
         }
@@ -162,7 +163,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['siswa_id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Catat Pelanggaran</title>
+    <title>Catat Pelanggaran - SMK Muhammadiyah Kota Tasikmalaya</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .siswa-list {
@@ -248,10 +249,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['siswa_id'])) {
                     <label class="form-label fw-bold">Kategori Pelanggaran</label>
                     <select name="kategori_id" id="kat" class="form-select form-select-lg" 
                             required onchange="setPoin()">
-                        <option value="">-- Pilih Jenis --</option>
+                        <option value="">-- Pilih Kategori --</option>
                         <?php foreach ($daftar_k as $k): ?>
                             <option value="<?= $k['id'] ?>" data-poin="<?= $k['poin'] ?>">
-                                <?= e($k['nama']) ?>
+                                <?= e($k['nama']) ?> — Poin: <?= $k['poin'] ?>
                             </option>
                         <?php endforeach; ?>
                     </select>
@@ -272,7 +273,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['siswa_id'])) {
                 </div>
 
                 <button type="submit" class="btn btn-primary btn-lg w-100" 
-                        <?= !$daftar_k ? 'disabled' : '' ?>>
+                    <?= !$daftar_k ? 'disabled' : '' ?>>
                     Simpan Pelanggaran
                 </button>
             </form>
@@ -293,7 +294,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['siswa_id'])) {
     let terpilih = null;
     let siswaTerpilihKelas = [];
 
-    // Jika wali kelas, langsung muat daftar siswa
+    // Muat otomatis jika wali kelas (sudah terpilih)
     window.onload = function() {
         if (pilihKelasEl.value) {
             filterSiswaByKelas();
@@ -309,6 +310,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['siswa_id'])) {
         cariSEl.disabled = !kelasId;
         namaTerpilihEl.style.display = 'none';
         terpilih = null;
+        daftarSiswaEl.style.display = 'none';
         
         if (!kelasId) {
             siswaTerpilihKelas = [];
@@ -317,26 +319,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['siswa_id'])) {
         
         // Tampilkan hanya siswa dari kelas yang dipilih
         siswaTerpilihKelas = semuaSiswa.filter(s => parseInt(s.kelas_id) === kelasId);
+        
+        // Tampilkan langsung daftar siswa
+        if (siswaTerpilihKelas.length > 0) {
+            render(siswaTerpilihKelas);
+        }
     }
 
-    function render(h) {
+    function render(daftar) {
         daftarSiswaEl.innerHTML = '';
-        if (!h.length) {
-            daftarSiswaEl.innerHTML = '<div class="p-2 text-muted">Tidak ditemukan</div>';
+        if (!daftar.length) {
+            daftarSiswaEl.innerHTML = '<div class="p-2 text-muted">Tidak ada siswa di kelas ini</div>';
             daftarSiswaEl.style.display = 'block';
             return;
         }
-        h.forEach(s => {
+        daftar.forEach(s => {
             const d = document.createElement('div');
             d.className = 'siswa-item' + (terpilih && terpilih.id === s.id ? ' selected' : '');
             d.textContent = s.nama + ' — NIS: ' + s.nis;
-            d.onclick = () => pilih(s);
+            d.onclick = () => pilihSiswa(s);
             daftarSiswaEl.appendChild(d);
         });
         daftarSiswaEl.style.display = 'block';
     }
 
-    function pilih(s) {
+    function pilihSiswa(s) {
         terpilih = s;
         siswaIdEl.value = s.id;
         cariSEl.value = s.nama;
@@ -345,26 +352,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['siswa_id'])) {
         daftarSiswaEl.style.display = 'none';
     }
 
-    function filter() {
+    function filterSiswa() {
         const k = cariSEl.value.trim().toLowerCase();
         if (!k) {
-            daftarSiswaEl.style.display = 'none';
+            render(siswaTerpilihKelas);
             return;
         }
-        render(siswaTerpilihKelas.filter(s => 
+        const hasil = siswaTerpilihKelas.filter(s => 
             s.nama.toLowerCase().includes(k) || s.nis.includes(k)
-        ));
+        );
+        render(hasil);
     }
 
+    // Tutup daftar jika klik di luar
     document.addEventListener('click', e => {
         if (!cariSEl.contains(e.target) && !daftarSiswaEl.contains(e.target)) {
             daftarSiswaEl.style.display = 'none';
         }
     });
 
-    cariSEl.addEventListener('input', filter);
+    cariSEl.addEventListener('input', filterSiswa);
     cariSEl.addEventListener('focus', () => {
-        if (cariSEl.value.trim()) filter();
+        if (siswaTerpilihKelas.length > 0) {
+            render(siswaTerpilihKelas);
+        }
     });
 
     function setPoin() {

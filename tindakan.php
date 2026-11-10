@@ -12,12 +12,12 @@ function e($val) {
 }
 
 // === Hak Akses ===
-if (!in_array($role, ['guru', 'wali_kelas'])) {
+if (!in_array($role, ['guru', 'wali_kelas', 'admin'])) {
     echo "<script>alert('Anda tidak berhak!');location.href='dashboard.php';</script>";
     exit;
 }
 
-// === Data Kelas Wali + CEK STATUS ===
+// === Data Kelas Wali ===
 $kelas_id = 0;
 $nama_kelas = '';
 $kelas_aktif = true;
@@ -38,7 +38,6 @@ if ($role === 'wali_kelas') {
         $kelas_aktif = (int)$r['status_aktif'] === 1;
     }
 
-    // === JIKA KELAS DINONAKTIFKAN — TAMPILKAN PESAN & HENTIKAN ===
     if (!$kelas_aktif) {
 ?>
 <!DOCTYPE html>
@@ -75,11 +74,58 @@ if ($role === 'wali_kelas') {
     }
 }
 
-// === Query Data Siswa ===
+// ✅ PROSES TANDAI SELESAI — Admin > Wali Kelas > Guru
+if (isset($_GET['selesai']) && is_numeric($_GET['selesai'])) {
+    $siswa_id = (int)$_GET['selesai'];
+    $boleh = false;
+
+    // 1. ADMIN = Boleh SEMUA
+    if ($role === 'admin') {
+        $boleh = true;
+    }
+    // 2. WALI KELAS = Boleh siswa di kelasnya saja
+    elseif ($role === 'wali_kelas' && $kelas_id > 0) {
+        $cek = mysqli_query($conn, "
+            SELECT 1 FROM t_kelas_siswa 
+            WHERE siswa_id = $siswa_id AND kelas_id = $kelas_id 
+            LIMIT 1
+        ");
+        $boleh = (mysqli_num_rows($cek) > 0);
+    }
+    // 3. GURU = Boleh semua
+    elseif ($role === 'guru') {
+        $boleh = true;
+    }
+
+    if ($boleh) {
+        mysqli_query($conn, "
+            UPDATE t_pelanggaran_siswa 
+            SET tindakan_selesai = 1 
+            WHERE siswa_id = $siswa_id 
+              AND tindakan_selesai = 0
+        ");
+        echo "<script>alert('✅ Tindakan ditandai selesai!');location.href='tindakan.php';</script>";
+    } else {
+        echo "<script>alert('❌ Tidak berhak! Role Anda: $role');location.href='tindakan.php';</script>";
+    }
+    exit;
+}
+
+// === Fungsi Tindakan ===
+function getTindakan($poin) {
+    if ($poin >= 110) return ['label' => 'WAJIB DIKELUARKAN', 'class' => 'bg-danger text-white fw-bold'];
+    if ($poin >= 90)  return ['label' => 'Surat Peringatan (SP) 3', 'class' => 'bg-danger text-white'];
+    if ($poin >= 70)  return ['label' => 'Surat Peringatan (SP) 2', 'class' => 'bg-warning text-dark'];
+    if ($poin >= 50)  return ['label' => 'Surat Peringatan (SP) 1', 'class' => 'bg-primary text-white'];
+    if ($poin >= 30)  return ['label' => 'Panggil ke BK', 'class' => 'bg-info text-white'];
+    return null;
+}
+
+// === Query Data ===
 if ($role === 'wali_kelas' && $kelas_id) {
     $q_siswa = mysqli_query($conn, "
         SELECT s.id, s.nama, s.nis,
-               COALESCE(SUM(p.poin), 0) AS total_poin,
+               COALESCE(SUM(CASE WHEN p.tindakan_selesai = 0 THEN p.poin ELSE 0 END), 0) AS total_poin,
                k.nama AS nama_kelas,
                g.nama AS wali_kelas
         FROM t_siswa s
@@ -90,12 +136,14 @@ if ($role === 'wali_kelas' && $kelas_id) {
         LEFT JOIN t_pelanggaran_siswa p ON s.id = p.siswa_id
         WHERE ks.kelas_id = $kelas_id
         GROUP BY s.id
+        HAVING total_poin >= 30
         ORDER BY total_poin DESC, s.nama ASC
     ");
 } else {
+    // Admin & Guru tampil semua
     $q_siswa = mysqli_query($conn, "
         SELECT s.id, s.nama, s.nis,
-               COALESCE(SUM(p.poin), 0) AS total_poin,
+               COALESCE(SUM(CASE WHEN p.tindakan_selesai = 0 THEN p.poin ELSE 0 END), 0) AS total_poin,
                k.nama AS nama_kelas,
                g.nama AS wali_kelas
         FROM t_siswa s
@@ -105,6 +153,7 @@ if ($role === 'wali_kelas' && $kelas_id) {
         LEFT JOIN t_guru g ON wk.guru_id = g.id
         LEFT JOIN t_pelanggaran_siswa p ON s.id = p.siswa_id
         GROUP BY s.id
+        HAVING total_poin >= 30
         ORDER BY total_poin DESC, s.nama ASC
     ");
 }
@@ -114,16 +163,6 @@ if ($q_siswa) {
     while ($row = mysqli_fetch_assoc($q_siswa)) {
         $daftar_siswa[] = $row;
     }
-}
-
-// === Aturan Tindakan ===
-function getTindakan($poin) {
-    if ($poin >= 110) return ['label' => 'WAJIB DIKELUARKAN', 'class' => 'bg-danger text-white fw-bold'];
-    if ($poin >= 90)  return ['label' => 'Surat Peringatan (SP) 3', 'class' => 'bg-danger text-white'];
-    if ($poin >= 70)  return ['label' => 'Surat Peringatan (SP) 2', 'class' => 'bg-warning text-dark'];
-    if ($poin >= 50)  return ['label' => 'Surat Peringatan (SP) 1', 'class' => 'bg-primary text-white'];
-    if ($poin >= 30)  return ['label' => 'Panggil ke BK', 'class' => 'bg-info text-white'];
-    return ['label' => 'Belum Ada Tindakan', 'class' => 'bg-success text-white'];
 }
 ?>
 <!DOCTYPE html>
@@ -140,7 +179,7 @@ function getTindakan($poin) {
         <?php include "menu.php"; ?>
         <main class="col-md-9 col-lg-10 p-4">
             <h2 class="mb-3">Tindakan Siswa</h2>
-            <p>Selamat datang, <strong><?= e($nama) ?></strong>!</p>
+            <p>Selamat datang, <strong><?= e($nama) ?></strong>! <small class="text-muted">(Role: <?= e($role) ?>)</small></p>
 
             <?php if ($role === 'wali_kelas'): ?>
                 <div class="alert alert-info mb-4">
@@ -190,14 +229,18 @@ function getTindakan($poin) {
                                     <th>Nama Siswa</th>
                                     <th width="12%">Kelas</th>
                                     <th width="15%">Wali Kelas</th>
-                                    <th width="10%" class="text-center">Total Poin</th>
-                                    <th width="22%" class="text-center">Tindakan</th>
+                                    <th width="8%" class="text-center">Poin</th>
+                                    <th width="20%" class="text-center">Tindakan</th>
+                                    <th width="12%" class="text-center">Opsi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php if (empty($daftar_siswa)): ?>
                                     <tr>
-                                        <td colspan="7" class="text-center text-muted py-4">Belum ada data siswa</td>
+                                        <td colspan="8" class="text-center text-muted py-4">
+                                            ✅ Semua siswa sudah ditindak lanjuti.<br>
+                                            Belum ada siswa yang memerlukan tindakan baru.
+                                        </td>
                                     </tr>
                                 <?php else: ?>
                                     <?php $no = 1; foreach ($daftar_siswa as $s):
@@ -209,11 +252,18 @@ function getTindakan($poin) {
                                         <td><?= e($s['nama']) ?></td>
                                         <td><?= e($s['nama_kelas'] ?? '-') ?></td>
                                         <td><?= e($s['wali_kelas'] ?? '-') ?></td>
-                                        <td class="text-center fw-bold fs-5"><?= (int)$s['total_poin'] ?></td>
+                                        <td class="text-center fw-bold text-danger"><?= (int)$s['total_poin'] ?></td>
                                         <td class="text-center">
                                             <span class="badge <?= $tindakan['class'] ?> fs-6 px-3 py-2">
                                                 <?= $tindakan['label'] ?>
                                             </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <a href="tindakan.php?selesai=<?= $s['id'] ?>"
+                                               class="btn btn-success btn-sm"
+                                               onclick="return confirm('Tandai selesai? Hilang dari sini, tetap ada di Riwayat.')">
+                                                ✅ Selesai
+                                            </a>
                                         </td>
                                     </tr>
                                     <?php endforeach; ?>

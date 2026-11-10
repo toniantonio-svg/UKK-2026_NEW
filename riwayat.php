@@ -6,6 +6,7 @@ cek_login();
 
 $nama = $_SESSION['name'];
 $role = strtolower(trim($_SESSION['role']));
+$guru_id = (int)($_SESSION['guru_id'] ?? 0);
 
 function e($val) {
     return htmlspecialchars((string)$val, ENT_QUOTES, 'UTF-8');
@@ -16,10 +17,20 @@ if (!in_array($role, ['admin', 'wali_kelas', 'guru'])) {
     exit;
 }
 
+// === HAPUS DATA ===
 if (isset($_GET['hapus']) && is_numeric($_GET['hapus'])) {
     $id_hapus = (int)$_GET['hapus'];
+    $boleh_hapus = false;
 
-    if ($role === 'wali_kelas') {
+    if ($role === 'guru') {
+        $cek = mysqli_query($conn, "
+            SELECT 1 FROM t_pelanggaran_siswa 
+            WHERE id = $id_hapus 
+              AND guru_id = $guru_id
+            LIMIT 1
+        ");
+        $boleh_hapus = mysqli_num_rows($cek) > 0;
+    } elseif ($role === 'wali_kelas') {
         $cek = mysqli_query($conn, "
             SELECT 1 FROM t_pelanggaran_siswa p
             LEFT JOIN t_siswa s ON p.siswa_id = s.id
@@ -31,10 +42,14 @@ if (isset($_GET['hapus']) && is_numeric($_GET['hapus'])) {
               AND w.status_aktif = 1
             LIMIT 1
         ");
-        if (!mysqli_num_rows($cek)) {
-            echo "<script>alert('Data tidak ditemukan atau Anda tidak berhak menghapus!');location.href='riwayat.php';</script>";
-            exit;
-        }
+        $boleh_hapus = mysqli_num_rows($cek) > 0;
+    } else {
+        $boleh_hapus = true;
+    }
+
+    if (!$boleh_hapus) {
+        echo "<script>alert('Anda hanya boleh menghapus catatan yang Anda buat/kelola sendiri!');location.href='riwayat.php';</script>";
+        exit;
     }
 
     mysqli_query($conn, "DELETE FROM t_pelanggaran_siswa WHERE id = $id_hapus");
@@ -98,25 +113,44 @@ if ($role === 'wali_kelas') {
 }
 }
 
-// === Query DIPERBAIKI — pakai nama kolom pelanggaran_kategori_id ===
-if ($role === 'wali_kelas' && $kelas_id) {
+// === QUERY DATA — TAMPIL SEMUA TERMASUK STATUS ===
+if ($role === 'guru' && $guru_id) {
     $sql = "
         SELECT p.id, s.nis, s.nama AS nama_siswa,
-               k.nama AS kategori, p.poin, p.keterangan, p.created_at AS tanggal
+               k.nama AS kategori, p.poin, p.keterangan, p.created_at AS tanggal,
+               g.nama AS dicatat_oleh,
+               p.tindakan_selesai
         FROM t_pelanggaran_siswa p
         LEFT JOIN t_siswa s ON p.siswa_id = s.id
-        LEFT JOIN t_pelanggaran_kategori k ON p.pelanggaran_kategori_id = k.id -- ✅ NAMA KOLOM BENAR
+        LEFT JOIN t_pelanggaran_kategori k ON p.kategori_id = k.id
+        LEFT JOIN t_guru g ON p.guru_id = g.id
+        WHERE p.guru_id = $guru_id
+        ORDER BY p.created_at DESC, p.id DESC
+    ";
+} elseif ($role === 'wali_kelas' && $kelas_id) {
+    $sql = "
+        SELECT p.id, s.nis, s.nama AS nama_siswa,
+               k.nama AS kategori, p.poin, p.keterangan, p.created_at AS tanggal,
+               g.nama AS dicatat_oleh,
+               p.tindakan_selesai
+        FROM t_pelanggaran_siswa p
+        LEFT JOIN t_siswa s ON p.siswa_id = s.id
+        LEFT JOIN t_pelanggaran_kategori k ON p.kategori_id = k.id
         LEFT JOIN t_kelas_siswa ks ON s.id = ks.siswa_id
+        LEFT JOIN t_guru g ON p.guru_id = g.id
         WHERE ks.kelas_id = $kelas_id
         ORDER BY p.created_at DESC, p.id DESC
     ";
 } else {
     $sql = "
         SELECT p.id, s.nis, s.nama AS nama_siswa,
-               k.nama AS kategori, p.poin, p.keterangan, p.created_at AS tanggal
+               k.nama AS kategori, p.poin, p.keterangan, p.created_at AS tanggal,
+               g.nama AS dicatat_oleh,
+               p.tindakan_selesai
         FROM t_pelanggaran_siswa p
         LEFT JOIN t_siswa s ON p.siswa_id = s.id
-        LEFT JOIN t_pelanggaran_kategori k ON p.pelanggaran_kategori_id = k.id -- ✅ NAMA KOLOM BENAR
+        LEFT JOIN t_pelanggaran_kategori k ON p.kategori_id = k.id
+        LEFT JOIN t_guru g ON p.guru_id = g.id
         ORDER BY p.created_at DESC, p.id DESC
     ";
 }
@@ -145,22 +179,24 @@ while ($row = mysqli_fetch_assoc($result)) {
 
             <?php if ($role === 'wali_kelas'): ?>
                 <div class="alert alert-info mb-4">
-                    Role: Wali Kelas | Kelas: <strong><?= e($nama_kelas) ?></strong>
+                    <strong>Peran:</strong> Wali Kelas | Kelas: <strong><?= e($nama_kelas) ?></strong> — Menampilkan semua pelanggaran di kelas Anda
                 </div>
             <?php elseif ($role === 'guru'): ?>
-                <div class="alert alert-info mb-4">
-                    Role: Guru — Menampilkan semua riwayat pelanggaran
+                <div class="alert alert-primary mb-4">
+                    <strong>Peran:</strong> Guru — Menampilkan hanya catatan pelanggaran yang <strong>Anda buat</strong>
                 </div>
             <?php else: ?>
-                <div class="alert alert-info mb-4">
-                    Role: Administrator — Menampilkan semua riwayat
+                <div class="alert alert-success mb-4">
+                    <strong>Peran:</strong> Administrator — Menampilkan semua riwayat pelanggaran
                 </div>
             <?php endif; ?>
 
             <?php if (empty($daftar_riwayat)): ?>
                 <div class="alert alert-warning">
                     Belum ada riwayat pelanggaran yang tercatat
-                    <a href="catat_pelanggaran.php" class="alert-link d-block mt-2">Catat pelanggaran baru</a>
+                    <?php if ($role === 'guru'): ?>
+                        <a href="catat_pelanggaran.php" class="alert-link d-block mt-2">→ Catat pelanggaran baru</a>
+                    <?php endif; ?>
                 </div>
             <?php else: ?>
                 <div class="card shadow-sm">
@@ -169,14 +205,16 @@ while ($row = mysqli_fetch_assoc($result)) {
                             <table class="table table-striped table-hover mb-0">
                                 <thead class="table-dark">
                                     <tr>
-                                        <th width="5%">No</th>
+                                        <th width="5%" class="text-center">No</th>
                                         <th width="12%">Tanggal</th>
-                                        <th width="12%">NIS</th>
-                                        <th width="18%">Nama Siswa</th>
-                                        <th width="18%">Kategori Pelanggaran</th>
-                                        <th width="8%" class="text-center">Poin</th>
+                                        <th width="10%">NIS</th>
+                                        <th width="15%">Nama Siswa</th>
+                                        <th width="14%">Kategori</th>
+                                        <th width="7%" class="text-center">Poin</th>
+                                        <th width="10%">Status</th>
+                                        <th width="14%">Dicatat Oleh</th>
                                         <th>Keterangan</th>
-                                        <th width="10%" class="text-center">Aksi</th>
+                                        <th width="8%" class="text-center">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -184,6 +222,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                                         $poin = (int)$r['poin'];
                                         $baris = $poin >= 10 ? 'table-danger' : ($poin >= 5 ? 'table-warning' : 'table-light');
                                         $tgl = date('d/m/Y H:i', strtotime($r['tanggal']));
+                                        $sudah_selesai = (int)($r['tindakan_selesai'] ?? 0) === 1;
                                     ?>
                                     <tr class="<?= $baris ?>">
                                         <td class="text-center"><?= $no++ ?></td>
@@ -192,6 +231,14 @@ while ($row = mysqli_fetch_assoc($result)) {
                                         <td><?= e($r['nama_siswa']) ?></td>
                                         <td><?= e($r['kategori'] ?? '-') ?></td>
                                         <td class="text-center fw-bold text-danger"><?= $poin ?></td>
+                                        <td class="text-center">
+                                            <?php if ($sudah_selesai): ?>
+                                                <span class="badge bg-success">✅ Selesai</span>
+                                            <?php else: ?>
+                                                <span class="badge bg-warning text-dark">⏳ Belum</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td><small><?= e($r['dicatat_oleh'] ?? '-') ?></small></td>
                                         <td><small class="text-muted"><?= e($r['keterangan'] ?? '-') ?></small></td>
                                         <td class="text-center">
                                             <a href="riwayat.php?hapus=<?= $r['id'] ?>"
