@@ -26,7 +26,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['pelanggaran_siswa_id
     if (empty($tindakan_baru)) {
         $pesan = '<div class="alert alert-danger">Isi tindakan terlebih dahulu!</div>';
     } else {
-        // ✅ SEMUA GURU/WALIKELAS DIPERBOLEHKAN — tidak dibatasi pembuat
         $s = $conn->prepare("UPDATE t_pelanggaran_siswa 
             SET tindakan = ?, 
                 tindakan_selesai = 1, 
@@ -44,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['pelanggaran_siswa_id
     }
 }
 
-// === AMBIL KELAS JIKA WALI KELAS ===
+// === AMBIL KELAS WALI KELAS (untuk info saja, TIDAK membatasi data) ===
 $kelas_id = 0;
 $nama_kelas = '';
 if ($role === 'wali_kelas') {
@@ -65,9 +64,13 @@ if ($role === 'wali_kelas') {
 
 // === AMBIL DATA SISWA ===
 $where = "";
-if ($role === 'wali_kelas' && $kelas_id > 0) {
-    $where = "WHERE ks.kelas_id = $kelas_id";
+$having = "";
+
+// ✅ Wali Kelas & Guru: tampilkan SEMUA siswa yang punya pelanggaran belum ditindak
+if ($role === 'wali_kelas' || $role === 'guru') {
+    $having = "HAVING jumlah_belum_tindak > 0";
 }
+// Admin: tampilkan semua siswa (termasuk yang sudah selesai)
 
 $sql = "
     SELECT 
@@ -105,6 +108,7 @@ $sql = "
     LEFT JOIN t_pelanggaran_siswa ps ON s.id = ps.siswa_id
     $where
     GROUP BY s.id, k.nama, g.nama
+    $having
     ORDER BY k.nama, s.nama
 ";
 
@@ -134,7 +138,8 @@ while ($row = mysqli_fetch_assoc($result)) {
 
             <?php if ($role === 'wali_kelas' && $nama_kelas): ?>
                 <div class="alert alert-info mb-4">
-                    Anda melihat data siswa kelas: <strong><?= e($nama_kelas) ?></strong>
+                    Anda adalah Wali Kelas: <strong><?= e($nama_kelas) ?></strong>
+                    <br><small>Menampilkan <strong>semua siswa</strong> dari semua kelas yang memiliki pelanggaran belum ditindaklanjuti</small>
                 </div>
             <?php endif; ?>
 
@@ -177,25 +182,24 @@ while ($row = mysqli_fetch_assoc($result)) {
                                             <?php endif; ?>
                                         </td>
                                         <td>
-                                            <?php if ($poin == 0): ?>
-                                                <span class="badge bg-success">Tertib</span>
-                                            <?php elseif ($ada_belum_tindak): ?>
+                                            <?php if ($ada_belum_tindak): ?>
                                                 <span class="badge bg-warning text-dark">Belum Ada Tindakan</span>
+                                                <?php if (!empty($info_tindakan)): ?>
+                                                    <br><small class="text-muted">Terakhir: <?= e($info_tindakan) ?></small>
+                                                <?php endif; ?>
                                             <?php elseif (!empty($info_tindakan)): ?>
                                                 <small><?= e($info_tindakan) ?></small>
                                             <?php else: ?>
-                                                <span class="badge bg-secondary">-</span>
+                                                <span class="badge bg-success">Tertib</span>
                                             <?php endif; ?>
                                         </td>
                                         <td class="text-center">
                                             <?php if ($ada_belum_tindak && $belum_tindak_id > 0): ?>
-                                                <!-- ✅ BISA BERI TINDAKAN SIAPAPUN -->
                                                 <button class="btn btn-sm btn-primary" data-bs-toggle="modal" 
                                                         data-bs-target="#modalTindakan<?= $belum_tindak_id ?>">
                                                     Beri Tindakan
                                                 </button>
                                                 
-                                                <!-- Modal Form Tindakan -->
                                                 <div class="modal fade" id="modalTindakan<?= $belum_tindak_id ?>" 
                                                      tabindex="-1" aria-labelledby="modalLabel<?= $belum_tindak_id ?>" aria-hidden="true">
                                                     <div class="modal-dialog">
@@ -213,7 +217,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                                                                     <div class="mb-3">
                                                                         <label class="form-label fw-bold">Nama Siswa</label>
                                                                         <input type="text" class="form-control" 
-                                                                               value="<?= e($s['nama_siswa']) ?> — NIS: <?= e($s['nis']) ?>" readonly>
+                                                                               value="<?= e($s['nama_siswa']) ?> — NIS: <?= e($s['nis']) ?> (<?= e($s['nama_kelas'] ?? '-') ?>)" readonly>
                                                                     </div>
                                                                     
                                                                     <div class="mb-3">
@@ -234,10 +238,8 @@ while ($row = mysqli_fetch_assoc($result)) {
                                                         </div>
                                                     </div>
                                                 </div>
-                                            <?php elseif ($poin > 0): ?>
-                                                <span class="badge bg-success">SELESAI</span>
                                             <?php else: ?>
-                                                <span class="text-muted">-</span>
+                                                <span class="badge bg-success">SELESAI</span>
                                             <?php endif; ?>
                                         </td>
                                     </tr>
@@ -245,7 +247,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                                 <?php else: ?>
                                     <tr>
                                         <td colspan="8" class="text-center text-muted py-4">
-                                            Belum ada data siswa.
+                                            ✅ Semua pelanggaran sudah ditindaklanjuti.
                                         </td>
                                     </tr>
                                 <?php endif; ?>

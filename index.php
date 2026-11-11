@@ -9,45 +9,7 @@ if (isset($_SESSION['user_id'])) {
     header("Location: dashboard.php");
     exit;
 }
-
-$error = "";
-
-if (isset($_POST['login'])) {
-    $username = trim($_POST['username']);
-    $password = $_POST['password'];
-
-    $stmt = mysqli_prepare(
-        $conn,
-        "SELECT * FROM t_users
-         WHERE name = ? OR email = ?
-         LIMIT 1"
-    );
-
-    mysqli_stmt_bind_param($stmt, "ss", $username, $username);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-    $user = mysqli_fetch_assoc($result);
-
-    if ($user && $password == $user['password']) {
-        $role = strtolower(trim($user['role']));
-
-        if ($role == "admin" || $role == "guru" || $role == "wali_kelas") {
-            session_regenerate_id(true);
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['name'] = $user['name'];
-            $_SESSION['role'] = $role;
-            header("Location: dashboard.php");
-            exit;
-        } else {
-            $error = "Role akun tidak diizinkan!";
-        }
-    } else {
-        $error = "Username atau password salah!";
-    }
-    mysqli_stmt_close($stmt);
-}
 ?>
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -61,14 +23,7 @@ if (isset($_POST['login'])) {
 
     <h2 class="mt-3 mb-4">Sistem Pelanggaran Siswa</h2>
 
-    <!-- PESAN ERROR DARI FORM LANGSUNG -->
-    <?php if ($error != ""): ?>
-        <div class="alert alert-danger w-25 mx-auto" role="alert">
-            <?= htmlspecialchars($error) ?>
-        </div>
-    <?php endif; ?>
-
-    <!-- PESAN DARI proses_login.php -->
+    <!-- PESAN ERROR -->
     <?php if (isset($_GET['pesan'])): ?>
         <div class="alert alert-danger w-25 mx-auto" role="alert">
             <?php

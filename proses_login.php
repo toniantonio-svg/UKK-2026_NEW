@@ -76,8 +76,8 @@ if (!$user) {
     }
 }
 
-// ✅ Cek password dengan password_verify()
-if (!$user || !password_verify($password, $user['password'])) {
+// ✅ Cek password langsung tanpa hash
+if (!$user || $password !== $user['password']) {
     header("Location: index.php?pesan=gagal");
     exit;
 }
