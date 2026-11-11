@@ -10,22 +10,31 @@ function e($v) {
 
 $pesan = '';
 
+// === AMBIL DAFTAR KATEGORI — SUDAH BENAR ===
+$kategori = mysqli_query($conn, "SELECT id, nama FROM t_pelanggaran_kategori WHERE status_aktif = 1 ORDER BY nama");
+if (!$kategori) die("Error ambil kategori: " . mysqli_error($conn));
+
 // === Proses Simpan ===
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Ambil dan tampilkan nilai untuk cek
+    $pelanggaran_kategori_id = isset($_POST['pelanggaran_kategori_id']) ? (int)$_POST['pelanggaran_kategori_id'] : 0;
     $kode = trim($_POST['kode'] ?? '');
     $nama = trim($_POST['nama'] ?? '');
     $poin = (int)($_POST['poin'] ?? 0);
     $deskripsi = trim($_POST['deskripsi'] ?? '');
-    $status_aktif = (int)($_POST['status_aktif'] ?? 1);
+    $status_aktif = isset($_POST['status_aktif']) ? (int)$_POST['status_aktif'] : 1;
 
+    // Validasi
     if (!$kode) {
         $pesan = '<div class="alert alert-danger">Kode pelanggaran wajib diisi!</div>';
     } elseif (!$nama) {
         $pesan = '<div class="alert alert-danger">Nama pelanggaran wajib diisi!</div>';
+    } elseif ($pelanggaran_kategori_id < 1) {
+        $pesan = '<div class="alert alert-danger">Silakan pilih Kategori Pelanggaran!</div>';
     } elseif ($poin < 1) {
         $pesan = '<div class="alert alert-danger">Poin harus lebih dari 0!</div>';
     } else {
-        // Cek kode duplikat
+        // Cek duplikat kode
         $cek = $conn->prepare("SELECT id FROM t_pelanggaran WHERE kode = ? LIMIT 1");
         $cek->bind_param("s", $kode);
         $cek->execute();
@@ -34,19 +43,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($cek->num_rows > 0) {
             $pesan = '<div class="alert alert-danger">Kode pelanggaran sudah digunakan!</div>';
         } else {
-            $kategori_id = 1; // Sesuaikan jika perlu
+            // Simpan data
             $stmt = $conn->prepare("
                 INSERT INTO t_pelanggaran
-                (pelanggaran_kategori_id, kode, nama, poin, deskripsi, status_aktif, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, NOW())
+                (pelanggaran_kategori_id, kode, nama, poin, deskripsi, status_aktif)
+                VALUES (?, ?, ?, ?, ?, ?)
             ");
-            $stmt->bind_param("isisss", $kategori_id, $kode, $nama, $poin, $deskripsi, $status_aktif);
+            $stmt->bind_param("isisss", $pelanggaran_kategori_id, $kode, $nama, $poin, $deskripsi, $status_aktif);
 
             if ($stmt->execute()) {
                 header("Location: kelola_jenis_pelanggaran.php?pesan=berhasil");
                 exit;
+            } else {
+                $pesan = '<div class="alert alert-danger">Gagal menyimpan: ' . $stmt->error . '</div>';
             }
-            $pesan = '<div class="alert alert-danger">Gagal menyimpan: ' . e($stmt->error) . '</div>';
             $stmt->close();
         }
         $cek->close();
@@ -70,16 +80,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="card shadow-sm border-0">
                 <div class="card-body">
                     <?= $pesan ?>
-                    <form method="POST">
+                    <form method="POST" action="">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Kategori Pelanggaran *</label>
+                            <select name="pelanggaran_kategori_id" class="form-select form-select-lg" required>
+                                <option value="">-- Pilih Kategori --</option>
+                                <?php while ($kt = mysqli_fetch_assoc($kategori)): ?>
+                                <option value="<?= $kt['id'] ?>">
+                                    <?= e($kt['nama']) ?>
+                                </option>
+                                <?php endwhile; ?>
+                            </select>
+                        </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">Kode Pelanggaran</label>
                             <input type="text" name="kode" class="form-control"
-                                   placeholder="Contoh: PLG001" value="<?= e($_POST['kode'] ?? '') ?>" required>
+                                   placeholder="Contoh: PLG002" value="<?= e($_POST['kode'] ?? '') ?>" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">Nama Pelanggaran</label>
                             <input type="text" name="nama" class="form-control"
-                                   placeholder="Contoh: Pelanggaran 01" value="<?= e($_POST['nama'] ?? '') ?>" required>
+                                   placeholder="Contoh: Terlambat Masuk Sekolah" value="<?= e($_POST['nama'] ?? '') ?>" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">Poin</label>
@@ -106,6 +127,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </main>
     </div>
 </div>
-<?php file_exists("footer.php") && include "footer.php"; ?>
 </body>
 </html>

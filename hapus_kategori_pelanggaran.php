@@ -7,39 +7,39 @@ cek_admin();
 
 if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     $id = (int)$_GET['id'];
-    $transaksi = false;
-
-    try {
-        mysqli_begin_transaction($conn);
-        $transaksi = true;
-
-        // LANGKAH 1: HAPUS DULU SEMUA DATA SISWA YANG PAKAI KATEGORI INI
-        $stmt = $conn->prepare("DELETE FROM t_pelanggaran_siswa WHERE kategori_id = ?");
-        $stmt->bind_param("i", $id);
-        $stmt->execute();
-        $jumlah_dihapus = $stmt->affected_rows;
-
-        // LANGKAH 2: BARU HAPUS KATEGORINYA
-        $stmt = $conn->prepare("DELETE FROM t_pelanggaran_kategori WHERE id = ?");
-        $stmt->bind_param("i", $id);
-        $stmt->execute();
-
-        mysqli_commit($conn);
-
-        $pesan = "Kategori berhasil dihapus!";
-        if ($jumlah_dihapus > 0) {
-            $pesan .= " Termasuk $jumlah_dihapus data pelanggaran siswa terkait.";
-        }
-
-        header("Location: kelola_kategori_pelanggaran.php?berhasil=1&pesan=" . urlencode($pesan));
-        exit;
-
-    } catch (Throwable $e) {
-        if ($transaksi) mysqli_rollback($conn);
-        $pesan = "Gagal: " . $e->getMessage();
+    
+    // ==============================================
+    // LANGKAH 1: HAPUS DARI t_pelanggaran_siswa
+    // ==============================================
+    $q1 = mysqli_query($conn, "DELETE FROM t_pelanggaran_siswa WHERE pelanggaran_kategori_id = $id");
+    if (!$q1) {
+        $q1 = mysqli_query($conn, "DELETE FROM t_pelanggaran_siswa WHERE kategori_id = $id");
+    }
+    
+    // ==============================================
+    // LANGKAH 2: HAPUS DARI t_pelanggaran ← INI YANG DULU KURANG!
+    // ==============================================
+    $q2 = mysqli_query($conn, "DELETE FROM t_pelanggaran WHERE pelanggaran_kategori_id = $id");
+    
+    if (!$q2) {
+        $pesan = "❌ Gagal hapus dari t_pelanggaran: " . mysqli_error($conn);
         header("Location: kelola_kategori_pelanggaran.php?gagal=1&pesan=" . urlencode($pesan));
         exit;
     }
+    
+    // ==============================================
+    // LANGKAH 3: BARU HAPUS KATEGORINYA
+    // ==============================================
+    $q3 = mysqli_query($conn, "DELETE FROM t_pelanggaran_kategori WHERE id = $id");
+    
+    if ($q3) {
+        $pesan = "✅ Kategori beserta semua data terkait berhasil DIHAPUS PERMANEN!";
+        header("Location: kelola_kategori_pelanggaran.php?berhasil=1&pesan=" . urlencode($pesan));
+    } else {
+        $pesan = "❌ Gagal hapus kategori: " . mysqli_error($conn);
+        header("Location: kelola_kategori_pelanggaran.php?gagal=1&pesan=" . urlencode($pesan));
+    }
+    exit;
 }
 
 header("Location: kelola_kategori_pelanggaran.php");

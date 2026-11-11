@@ -28,7 +28,6 @@ if (!$result) die("Ambil data kategori gagal: " . mysqli_error($conn));
         .table th, .table td { vertical-align: middle; white-space: nowrap; }
         .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .btn-sm { padding: 0.2rem 0.5rem; font-size: 0.75rem; }
-        #tabelKategori td:last-child { width: 130px; }
         .badge { font-size: 0.8rem; }
     </style>
 </head>
@@ -60,14 +59,12 @@ if (!$result) die("Ambil data kategori gagal: " . mysqli_error($conn));
                         <table id="tabelKategori" class="table table-bordered table-striped table-hover align-middle w-100">
                             <thead class="table-primary text-white">
                                 <tr>
-                                    <th class="text-center" width="5%">No.</th>
-                                    <th class="text-center" width="5%">ID</th>
-                                    <th width="15%">Nama</th>
-                                    <th width="25%">Deskripsi</th>
-                                    <th class="text-center" width="10%">Status Aktif</th>
-                                    <th width="12%">Dibuat</th>
-                                    <th width="12%">Diupdate</th>
-                                    <th class="text-center" width="14%">Aksi</th>
+                                    <th class="text-center" width="8%">No.</th>
+                                    <th width="32%">Nama</th>
+                                    <th class="text-center" width="12%">Status Aktif</th>
+                                    <th width="18%">Dibuat</th>
+                                    <th width="18%">Diupdate</th>
+                                    <th class="text-center" width="12%">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -79,17 +76,13 @@ if (!$result) die("Ambil data kategori gagal: " . mysqli_error($conn));
                                     $status = $row['status_aktif'] ?? '';
                                     if ((string)$status === '1') {
                                         $status_badge = '<span class="badge bg-success">Aktif</span>';
-                                    } elseif (in_array(strtolower((string)$status), ['0','tidak aktif','nonaktif'], true)) {
-                                        $status_badge = '<span class="badge bg-secondary">Tidak Aktif</span>';
                                     } else {
-                                        $status_badge = e($status);
+                                        $status_badge = '<span class="badge bg-secondary">Tidak Aktif</span>';
                                     }
                                 ?>
                                 <tr>
                                     <td class="text-center"><?= $no++ ?></td>
-                                    <td class="text-center"><?= e($row['id']) ?></td>
                                     <td><?= e($row['nama']) ?></td>
-                                    <td><?= e($row['deskripsi']) ?></td>
                                     <td class="text-center"><?= $status_badge ?></td>
                                     <td><?= e($row['created_at']) ?></td>
                                     <td><?= e($updated) ?></td>
@@ -121,10 +114,10 @@ $(document).ready(function () {
         language: { url: 'https://cdn.datatables.net/plug-ins/2.3.4/i18n/id.json' },
         pageLength: 10,
         lengthMenu: [[5,10,25,50,100,-1],[5,10,25,50,100,'Semua']],
-        order: [[1,'asc']],
+        order: [[0,'asc']],
         columnDefs: [
-            { targets: [0,7], orderable:false, searchable:false },
-            { targets: [0,1,4,7], className:'text-center' }
+            { targets: [0,2,5], orderable:false, searchable:false },
+            { targets: [0,2,5], className:'text-center' }
         ],
         autoWidth: false,
         layout: { topStart:'pageLength', topEnd:'search', bottomStart:'info', bottomEnd:'paging' }

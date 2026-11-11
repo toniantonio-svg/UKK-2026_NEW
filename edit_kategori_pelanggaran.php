@@ -23,17 +23,15 @@ if (!$data) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $nama_val    = trim($_POST['nama'] ?? '');
-    $desk_val    = trim($_POST['deskripsi'] ?? '');
-    $aktif_val   = isset($_POST['status_aktif']) ? 1 : 0;
+    $nama_val = trim($_POST['nama'] ?? '');
+    $aktif_val = (int)($_POST['status_aktif'] ?? 0);
 
     if ($nama_val) {
         $update = mysqli_query($conn, "
             UPDATE t_pelanggaran_kategori SET
-                nama         = '" . mysqli_real_escape_string($conn, $nama_val) . "',
-                deskripsi    = '" . mysqli_real_escape_string($conn, $desk_val) . "',
+                nama = '" . mysqli_real_escape_string($conn, $nama_val) . "',
                 status_aktif = " . $aktif_val . ",
-                updated_at   = CURRENT_TIMESTAMP
+                updated_at = CURRENT_TIMESTAMP
             WHERE id = " . $id . "
         ");
 
@@ -70,7 +68,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="card shadow-sm">
                 <div class="card-body">
                     <form method="POST">
-                        <!-- HANYA KATEGORI / NAMA SAJA -->
                         <div class="row mb-3">
                             <label class="col-sm-2 col-form-label">Kategori</label>
                             <div class="col-sm-10">
@@ -78,17 +75,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                        value="<?= e($data['nama']) ?>" required>
                             </div>
                         </div>
-                        <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label">Deskripsi</label>
-                            <div class="col-sm-10">
-                                <textarea name="deskripsi" class="form-control" rows="3"><?= e($data['deskripsi']) ?></textarea>
-                            </div>
-                        </div>
                         <div class="row mb-4">
                             <label class="col-sm-2 col-form-label">Status Aktif</label>
-                            <div class="col-sm-10 pt-2">
-                                <input type="checkbox" name="status_aktif" 
-                                    <?= (($data['status_aktif'] ?? 1) == 1) ? 'checked' : '' ?>> Aktif
+                            <div class="col-sm-10">
+                                <select name="status_aktif" class="form-select">
+                                    <option value="1" <?= ($data['status_aktif'] ?? 1) == 1 ? 'selected' : '' ?>>Aktif</option>
+                                    <option value="0" <?= ($data['status_aktif'] ?? 1) == 0 ? 'selected' : '' ?>>Tidak Aktif</option>
+                                </select>
                             </div>
                         </div>
                         <div class="d-flex gap-2">

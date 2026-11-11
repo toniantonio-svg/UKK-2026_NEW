@@ -8,31 +8,17 @@ function e($v) {
     return htmlspecialchars((string)($v ?? ''), ENT_QUOTES, 'UTF-8');
 }
 
-// Cek apakah kolom poin ada di tabel
-$cek_kolom = mysqli_query($conn, "SHOW COLUMNS FROM t_pelanggaran_kategori LIKE 'poin'");
-$ada_poin = $cek_kolom && mysqli_num_rows($cek_kolom) > 0;
-
 $pesan = '';
 
-// === Proses Simpan ===
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nama = trim($_POST['nama'] ?? '');
-    $deskripsi = trim($_POST['deskripsi'] ?? '');
-    $poin = (int)($_POST['poin'] ?? 0);
     $status = (int)($_POST['status_aktif'] ?? 1);
 
     if (!$nama) {
         $pesan = '<div class="alert alert-danger">Nama kategori wajib diisi!</div>';
-    } elseif ($ada_poin && $poin < 1) {
-        $pesan = '<div class="alert alert-danger">Poin harus lebih dari 0!</div>';
     } else {
-        if ($ada_poin) {
-            $stmt = $conn->prepare("INSERT INTO t_pelanggaran_kategori (nama, deskripsi, poin, status_aktif) VALUES (?, ?, ?, ?)");
-            $stmt->bind_param("ssii", $nama, $deskripsi, $poin, $status);
-        } else {
-            $stmt = $conn->prepare("INSERT INTO t_pelanggaran_kategori (nama, deskripsi, status_aktif) VALUES (?, ?, ?)");
-            $stmt->bind_param("ssi", $nama, $deskripsi, $status);
-        }
+        $stmt = $conn->prepare("INSERT INTO t_pelanggaran_kategori (nama, status_aktif) VALUES (?, ?)");
+        $stmt->bind_param("si", $nama, $status);
 
         if ($stmt->execute()) {
             header("Location: kelola_kategori_pelanggaran.php?pesan=berhasil");
@@ -66,18 +52,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <input type="text" name="nama" class="form-control"
                                    placeholder="Contoh: Kedisiplinan" value="<?= e($_POST['nama'] ?? '') ?>" required>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Deskripsi</label>
-                            <textarea name="deskripsi" class="form-control" rows="3"
-                                      placeholder="Masukkan deskripsi kategori"><?= e($_POST['deskripsi'] ?? '') ?></textarea>
-                        </div>
-                        <?php if ($ada_poin): ?>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Poin Pelanggaran</label>
-                            <input type="number" name="poin" class="form-control"
-                                   min="1" value="<?= e($_POST['poin'] ?? '') ?>" required>
-                        </div>
-                        <?php endif; ?>
                         <div class="mb-4">
                             <label class="form-label fw-bold">Status</label>
                             <select name="status_aktif" class="form-select">
@@ -85,7 +59,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <option value="0" <?= ($_POST['status_aktif'] ?? 1) == 0 ? 'selected' : '' ?>>Tidak Aktif</option>
                             </select>
                         </div>
-
                         <div>
                             <button type="submit" class="btn btn-primary">Simpan</button>
                             <a href="kelola_kategori_pelanggaran.php" class="btn btn-secondary">Kembali</a>
