@@ -76,8 +76,8 @@ if (!$user) {
     }
 }
 
-// Cek akun & password
-if (!$user || $password !== $user['password']) {
+// ✅ Cek password dengan password_verify()
+if (!$user || !password_verify($password, $user['password'])) {
     header("Location: index.php?pesan=gagal");
     exit;
 }
@@ -130,7 +130,6 @@ if ($role === 'guru') {
 
 // ===================== WALI KELAS =====================
 if ($role === 'wali_kelas') {
-    // Cek status aktif di t_guru
     $stmt = mysqli_prepare(
         $conn,
         "SELECT id, nama, email, status_aktif
@@ -161,7 +160,6 @@ if ($role === 'wali_kelas') {
     exit;
 }
 
-// ===================== SALAH =====================
 header("Location: index.php?pesan=gagal");
 exit;
 ?>
